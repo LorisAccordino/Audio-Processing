@@ -170,7 +170,7 @@
             zoomSlider.Name = "zoomSlider";
             zoomSlider.Size = new Size(292, 56);
             zoomSlider.TabIndex = 9;
-            zoomSlider.TickFrequency = 0;
+            zoomSlider.TickFrequency = 5;
             zoomSlider.Value = 10;
             zoomSlider.ValueChanged += zoomSlider_ValueChanged;
             // 
@@ -200,7 +200,7 @@
             pitchSlider.Name = "pitchSlider";
             pitchSlider.Size = new Size(292, 56);
             pitchSlider.TabIndex = 12;
-            pitchSlider.TickFrequency = 0;
+            pitchSlider.TickFrequency = 10;
             pitchSlider.Value = 100;
             pitchSlider.ValueChanged += pitchSlider_ValueChanged;
             // 
@@ -285,7 +285,7 @@
             tempoSlider.Name = "tempoSlider";
             tempoSlider.Size = new Size(292, 56);
             tempoSlider.TabIndex = 18;
-            tempoSlider.TickFrequency = 0;
+            tempoSlider.TickFrequency = 10;
             tempoSlider.Value = 100;
             tempoSlider.ValueChanged += tempoSlider_ValueChanged;
             // 
@@ -324,7 +324,7 @@
             speedSlider.Name = "speedSlider";
             speedSlider.Size = new Size(292, 56);
             speedSlider.TabIndex = 14;
-            speedSlider.TickFrequency = 0;
+            speedSlider.TickFrequency = 10;
             speedSlider.Value = 100;
             speedSlider.ValueChanged += speedSlider_ValueChanged;
             // 
