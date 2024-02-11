@@ -15,14 +15,6 @@
         }
 
 
-        public static byte[] ConvertFloatArrayToByteArray(float[] floatArray)
-        {
-            int byteCount = floatArray.Length * sizeof(float);
-            byte[] byteArray = new byte[byteCount];
-            Buffer.BlockCopy(floatArray, 0, byteArray, 0, byteCount);
-            return byteArray;
-        }
-
         public static byte[] ConvertShortArrayToByteArray(short[] shortArray)
         {
             byte[] byteArray = new byte[shortArray.Length * sizeof(short)];

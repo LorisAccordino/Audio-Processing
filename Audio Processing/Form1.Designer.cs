@@ -29,27 +29,18 @@
         private void InitializeComponent()
         {
             waveformPlot = new ScottPlot.WinForms.FormsPlot();
-            volumeFader = new TrackBar();
             label1 = new Label();
             label2 = new Label();
-            volumeLabel = new Label();
             label3 = new Label();
-            zoomSlider = new TrackBar();
-            label4 = new Label();
-            zoomLabel = new Label();
-            pitchSlider = new TrackBar();
             playbackGroupBox = new GroupBox();
+            zoomSlider = new GUI.PrecisionSlider();
+            timeSlider = new GUI.PrecisionSlider();
+            pitchSlider = new GUI.PrecisionSlider();
+            speedSlider = new GUI.PrecisionSlider();
+            timeElapsedLabel = new Label();
             label14 = new Label();
             stopButton = new Button();
             playButton = new Button();
-            tempoLabel = new Label();
-            label7 = new Label();
-            tempoSlider = new TrackBar();
-            pitchLabel = new Label();
-            speedLabel = new Label();
-            label6 = new Label();
-            speedSlider = new TrackBar();
-            label5 = new Label();
             lowPot = new NAudio.Gui.Pot();
             midPot = new NAudio.Gui.Pot();
             highPot = new NAudio.Gui.Pot();
@@ -73,36 +64,34 @@
             label12 = new Label();
             label11 = new Label();
             panPot = new NAudio.Gui.Pot();
+            volumeSlider = new GUI.PrecisionSlider();
             tabControl = new TabControl();
             waveformPage = new TabPage();
             leftRightWaveformPage = new TabPage();
             leftWaveformPlot = new ScottPlot.WinForms.FormsPlot();
             rightWaveformPlot = new ScottPlot.WinForms.FormsPlot();
+            eqWaveformPage = new TabPage();
+            highEQplot = new ScottPlot.WinForms.FormsPlot();
+            midEQplot = new ScottPlot.WinForms.FormsPlot();
+            lowEQplot = new ScottPlot.WinForms.FormsPlot();
             spectrogramPage = new TabPage();
-            groupBox1 = new GroupBox();
-            fftHzLabel = new Label();
-            fftDbLabel = new Label();
-            label16 = new Label();
-            label15 = new Label();
-            fftDbTrackbar = new TrackBar();
-            fftHzTrackbar = new TrackBar();
+            tunerGroupBox = new GroupBox();
+            toneLabel = new Label();
+            fftLimitsGroupBox = new GroupBox();
+            fftDbSlider = new GUI.PrecisionSlider();
+            fftHzSlider = new GUI.PrecisionSlider();
             spectrumPlot = new ScottPlot.WinForms.FormsPlot();
-            ((System.ComponentModel.ISupportInitialize)volumeFader).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)zoomSlider).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pitchSlider).BeginInit();
             playbackGroupBox.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)tempoSlider).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)speedSlider).BeginInit();
             eqGroupBox.SuspendLayout();
             menuStrip1.SuspendLayout();
             volumeGroupBox.SuspendLayout();
             tabControl.SuspendLayout();
             waveformPage.SuspendLayout();
             leftRightWaveformPage.SuspendLayout();
+            eqWaveformPage.SuspendLayout();
             spectrogramPage.SuspendLayout();
-            groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)fftDbTrackbar).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)fftHzTrackbar).BeginInit();
+            tunerGroupBox.SuspendLayout();
+            fftLimitsGroupBox.SuspendLayout();
             SuspendLayout();
             // 
             // waveformPlot
@@ -114,22 +103,10 @@
             waveformPlot.Size = new Size(1074, 451);
             waveformPlot.TabIndex = 0;
             // 
-            // volumeFader
-            // 
-            volumeFader.Location = new Point(188, 26);
-            volumeFader.Maximum = 1500;
-            volumeFader.Name = "volumeFader";
-            volumeFader.Orientation = Orientation.Vertical;
-            volumeFader.Size = new Size(56, 358);
-            volumeFader.TabIndex = 4;
-            volumeFader.TickFrequency = 175;
-            volumeFader.Value = 1000;
-            volumeFader.ValueChanged += volumeFader_ValueChanged;
-            // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(223, 33);
+            label1.Location = new Point(209, 33);
             label1.Name = "label1";
             label1.Size = new Size(49, 20);
             label1.TabIndex = 5;
@@ -138,89 +115,31 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(221, 354);
+            label2.Location = new Point(207, 364);
             label2.Name = "label2";
             label2.Size = new Size(53, 20);
             label2.TabIndex = 6;
             label2.Text = "-40 dB";
             // 
-            // volumeLabel
-            // 
-            volumeLabel.Location = new Point(171, 377);
-            volumeLabel.Name = "volumeLabel";
-            volumeLabel.Size = new Size(62, 25);
-            volumeLabel.TabIndex = 7;
-            volumeLabel.Text = "0 dB";
-            volumeLabel.TextAlign = ContentAlignment.TopCenter;
-            // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(232, 144);
+            label3.Location = new Point(218, 88);
             label3.Name = "label3";
             label3.Size = new Size(39, 20);
             label3.TabIndex = 8;
             label3.Text = "0 dB";
             // 
-            // zoomSlider
-            // 
-            zoomSlider.Location = new Point(81, 35);
-            zoomSlider.Maximum = 200;
-            zoomSlider.Minimum = 10;
-            zoomSlider.Name = "zoomSlider";
-            zoomSlider.Size = new Size(292, 56);
-            zoomSlider.TabIndex = 9;
-            zoomSlider.TickFrequency = 5;
-            zoomSlider.Value = 10;
-            zoomSlider.ValueChanged += zoomSlider_ValueChanged;
-            // 
-            // label4
-            // 
-            label4.AutoSize = true;
-            label4.Location = new Point(23, 35);
-            label4.Name = "label4";
-            label4.Size = new Size(52, 20);
-            label4.TabIndex = 10;
-            label4.Text = "Zoom:";
-            // 
-            // zoomLabel
-            // 
-            zoomLabel.AutoSize = true;
-            zoomLabel.Location = new Point(379, 35);
-            zoomLabel.Name = "zoomLabel";
-            zoomLabel.Size = new Size(24, 20);
-            zoomLabel.TabIndex = 11;
-            zoomLabel.Text = "1x";
-            // 
-            // pitchSlider
-            // 
-            pitchSlider.Location = new Point(81, 97);
-            pitchSlider.Maximum = 200;
-            pitchSlider.Minimum = 50;
-            pitchSlider.Name = "pitchSlider";
-            pitchSlider.Size = new Size(292, 56);
-            pitchSlider.TabIndex = 12;
-            pitchSlider.TickFrequency = 10;
-            pitchSlider.Value = 100;
-            pitchSlider.ValueChanged += pitchSlider_ValueChanged;
-            // 
             // playbackGroupBox
             // 
+            playbackGroupBox.Controls.Add(zoomSlider);
+            playbackGroupBox.Controls.Add(timeSlider);
+            playbackGroupBox.Controls.Add(pitchSlider);
+            playbackGroupBox.Controls.Add(speedSlider);
+            playbackGroupBox.Controls.Add(timeElapsedLabel);
             playbackGroupBox.Controls.Add(label14);
             playbackGroupBox.Controls.Add(stopButton);
             playbackGroupBox.Controls.Add(playButton);
-            playbackGroupBox.Controls.Add(tempoLabel);
-            playbackGroupBox.Controls.Add(label7);
-            playbackGroupBox.Controls.Add(tempoSlider);
-            playbackGroupBox.Controls.Add(pitchLabel);
-            playbackGroupBox.Controls.Add(speedLabel);
-            playbackGroupBox.Controls.Add(label6);
-            playbackGroupBox.Controls.Add(speedSlider);
-            playbackGroupBox.Controls.Add(label5);
-            playbackGroupBox.Controls.Add(zoomSlider);
-            playbackGroupBox.Controls.Add(pitchSlider);
-            playbackGroupBox.Controls.Add(label4);
-            playbackGroupBox.Controls.Add(zoomLabel);
             playbackGroupBox.Location = new Point(12, 529);
             playbackGroupBox.Name = "playbackGroupBox";
             playbackGroupBox.Size = new Size(1076, 162);
@@ -228,10 +147,76 @@
             playbackGroupBox.TabStop = false;
             playbackGroupBox.Text = "Playback:";
             // 
+            // zoomSlider
+            // 
+            zoomSlider.Location = new Point(23, 21);
+            zoomSlider.Maximum = 100F;
+            zoomSlider.Minimum = 1F;
+            zoomSlider.Name = "zoomSlider";
+            zoomSlider.Precision = 0.1F;
+            zoomSlider.PrecisionScale = GUI.PrecisionScale.Exponential;
+            zoomSlider.Size = new Size(394, 70);
+            zoomSlider.TabIndex = 27;
+            zoomSlider.Text = "Zoom:";
+            zoomSlider.TickFrequency = 30;
+            zoomSlider.Value = 1F;
+            zoomSlider.ValueSuffix = "x";
+            // 
+            // timeSlider
+            // 
+            timeSlider.Location = new Point(438, 86);
+            timeSlider.Maximum = 2F;
+            timeSlider.Minimum = 0.5F;
+            timeSlider.Name = "timeSlider";
+            timeSlider.PrecisionScale = GUI.PrecisionScale.Linear;
+            timeSlider.Size = new Size(393, 70);
+            timeSlider.TabIndex = 26;
+            timeSlider.Text = "Time:";
+            timeSlider.TickFrequency = 5;
+            timeSlider.Value = 1F;
+            timeSlider.ValueSuffix = "x";
+            // 
+            // pitchSlider
+            // 
+            pitchSlider.Location = new Point(23, 86);
+            pitchSlider.Maximum = 200F;
+            pitchSlider.Minimum = 10F;
+            pitchSlider.Name = "pitchSlider";
+            pitchSlider.PrecisionScale = GUI.PrecisionScale.Linear;
+            pitchSlider.Size = new Size(394, 70);
+            pitchSlider.TabIndex = 25;
+            pitchSlider.Text = "Pitch:";
+            pitchSlider.TickFrequency = 500;
+            pitchSlider.Value = 100F;
+            pitchSlider.ValueSuffix = "%";
+            // 
+            // speedSlider
+            // 
+            speedSlider.Location = new Point(438, 24);
+            speedSlider.Maximum = 2F;
+            speedSlider.Minimum = 0.25F;
+            speedSlider.Name = "speedSlider";
+            speedSlider.PrecisionScale = GUI.PrecisionScale.Linear;
+            speedSlider.Size = new Size(393, 70);
+            speedSlider.TabIndex = 1;
+            speedSlider.Text = "Speed:";
+            speedSlider.TickFrequency = 10;
+            speedSlider.Value = 1F;
+            speedSlider.ValueSuffix = "x";
+            // 
+            // timeElapsedLabel
+            // 
+            timeElapsedLabel.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            timeElapsedLabel.Location = new Point(847, 77);
+            timeElapsedLabel.Name = "timeElapsedLabel";
+            timeElapsedLabel.Size = new Size(218, 79);
+            timeElapsedLabel.TabIndex = 24;
+            timeElapsedLabel.Text = "Samples: 0\r\nTime: 00:00,000";
+            // 
             // label14
             // 
             label14.AutoSize = true;
-            label14.Location = new Point(856, 43);
+            label14.Location = new Point(847, 43);
             label14.Name = "label14";
             label14.Size = new Size(106, 20);
             label14.TabIndex = 23;
@@ -240,7 +225,7 @@
             // stopButton
             // 
             stopButton.Font = new Font("Consolas", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            stopButton.Location = new Point(1022, 26);
+            stopButton.Location = new Point(1017, 26);
             stopButton.Name = "stopButton";
             stopButton.Size = new Size(48, 48);
             stopButton.TabIndex = 22;
@@ -251,91 +236,13 @@
             // playButton
             // 
             playButton.Font = new Font("Consolas", 16.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            playButton.Location = new Point(968, 26);
+            playButton.Location = new Point(961, 26);
             playButton.Name = "playButton";
             playButton.Size = new Size(48, 48);
             playButton.TabIndex = 21;
             playButton.Text = "⏵";
             playButton.UseVisualStyleBackColor = true;
             playButton.Click += playButton_Click;
-            // 
-            // tempoLabel
-            // 
-            tempoLabel.AutoSize = true;
-            tempoLabel.Location = new Point(800, 97);
-            tempoLabel.Name = "tempoLabel";
-            tempoLabel.Size = new Size(24, 20);
-            tempoLabel.TabIndex = 20;
-            tempoLabel.Text = "1x";
-            // 
-            // label7
-            // 
-            label7.AutoSize = true;
-            label7.Location = new Point(438, 97);
-            label7.Name = "label7";
-            label7.Size = new Size(45, 20);
-            label7.TabIndex = 19;
-            label7.Text = "Time:";
-            // 
-            // tempoSlider
-            // 
-            tempoSlider.Location = new Point(502, 97);
-            tempoSlider.Maximum = 200;
-            tempoSlider.Minimum = 50;
-            tempoSlider.Name = "tempoSlider";
-            tempoSlider.Size = new Size(292, 56);
-            tempoSlider.TabIndex = 18;
-            tempoSlider.TickFrequency = 10;
-            tempoSlider.Value = 100;
-            tempoSlider.ValueChanged += tempoSlider_ValueChanged;
-            // 
-            // pitchLabel
-            // 
-            pitchLabel.AutoSize = true;
-            pitchLabel.Location = new Point(379, 97);
-            pitchLabel.Name = "pitchLabel";
-            pitchLabel.Size = new Size(29, 20);
-            pitchLabel.TabIndex = 17;
-            pitchLabel.Text = "0%";
-            // 
-            // speedLabel
-            // 
-            speedLabel.AutoSize = true;
-            speedLabel.Location = new Point(800, 35);
-            speedLabel.Name = "speedLabel";
-            speedLabel.Size = new Size(24, 20);
-            speedLabel.TabIndex = 16;
-            speedLabel.Text = "1x";
-            // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Location = new Point(431, 35);
-            label6.Name = "label6";
-            label6.Size = new Size(54, 20);
-            label6.TabIndex = 15;
-            label6.Text = "Speed:";
-            // 
-            // speedSlider
-            // 
-            speedSlider.Location = new Point(502, 35);
-            speedSlider.Maximum = 200;
-            speedSlider.Minimum = 30;
-            speedSlider.Name = "speedSlider";
-            speedSlider.Size = new Size(292, 56);
-            speedSlider.TabIndex = 14;
-            speedSlider.TickFrequency = 10;
-            speedSlider.Value = 100;
-            speedSlider.ValueChanged += speedSlider_ValueChanged;
-            // 
-            // label5
-            // 
-            label5.AutoSize = true;
-            label5.Location = new Point(31, 97);
-            label5.Name = "label5";
-            label5.Size = new Size(44, 20);
-            label5.TabIndex = 13;
-            label5.Text = "Pitch:";
             // 
             // lowPot
             // 
@@ -476,6 +383,7 @@
             profileMicrophoneToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.M;
             profileMicrophoneToolStripMenuItem.Size = new Size(274, 26);
             profileMicrophoneToolStripMenuItem.Text = "Profile microphone";
+            profileMicrophoneToolStripMenuItem.Click += profileMicrophoneToolStripMenuItem_Click;
             // 
             // audioOpenFileDialog
             // 
@@ -493,8 +401,7 @@
             volumeGroupBox.Controls.Add(label1);
             volumeGroupBox.Controls.Add(label3);
             volumeGroupBox.Controls.Add(label2);
-            volumeGroupBox.Controls.Add(volumeLabel);
-            volumeGroupBox.Controls.Add(volumeFader);
+            volumeGroupBox.Controls.Add(volumeSlider);
             volumeGroupBox.Location = new Point(1099, 33);
             volumeGroupBox.Name = "volumeGroupBox";
             volumeGroupBox.Size = new Size(300, 511);
@@ -529,7 +436,7 @@
             isStereoCheckbox.AutoSize = true;
             isStereoCheckbox.Checked = true;
             isStereoCheckbox.CheckState = CheckState.Checked;
-            isStereoCheckbox.Location = new Point(175, 471);
+            isStereoCheckbox.Location = new Point(143, 468);
             isStereoCheckbox.Name = "isStereoCheckbox";
             isStereoCheckbox.Size = new Size(72, 24);
             isStereoCheckbox.TabIndex = 13;
@@ -540,16 +447,16 @@
             // label13
             // 
             label13.AutoSize = true;
-            label13.Location = new Point(162, 413);
+            label13.Location = new Point(238, 416);
             label13.Name = "label13";
-            label13.Size = new Size(35, 20);
+            label13.Size = new Size(32, 20);
             label13.TabIndex = 12;
-            label13.Text = "Pan:";
+            label13.Text = "Pan";
             // 
             // label12
             // 
             label12.AutoSize = true;
-            label12.Location = new Point(249, 443);
+            label12.Location = new Point(267, 485);
             label12.Name = "label12";
             label12.Size = new Size(18, 20);
             label12.TabIndex = 11;
@@ -558,7 +465,7 @@
             // label11
             // 
             label11.AutoSize = true;
-            label11.Location = new Point(206, 443);
+            label11.Location = new Point(224, 485);
             label11.Name = "label11";
             label11.Size = new Size(16, 20);
             label11.TabIndex = 10;
@@ -566,7 +473,7 @@
             // 
             // panPot
             // 
-            panPot.Location = new Point(208, 393);
+            panPot.Location = new Point(226, 435);
             panPot.Margin = new Padding(4, 5, 4, 5);
             panPot.Maximum = 1D;
             panPot.Minimum = -1D;
@@ -576,10 +483,27 @@
             panPot.Value = 0D;
             panPot.ValueChanged += panPot_ValueChanged;
             // 
+            // volumeSlider
+            // 
+            volumeSlider.Location = new Point(177, 26);
+            volumeSlider.Maximum = 3F;
+            volumeSlider.Minimum = -40F;
+            volumeSlider.Name = "volumeSlider";
+            volumeSlider.Orientation = Orientation.Vertical;
+            volumeSlider.Precision = 0.1F;
+            volumeSlider.PrecisionScale = GUI.PrecisionScale.Logarithmic;
+            volumeSlider.Size = new Size(62, 387);
+            volumeSlider.TabIndex = 28;
+            volumeSlider.Text = "precisionSlider1";
+            volumeSlider.TickFrequency = 20;
+            volumeSlider.Value = 0F;
+            volumeSlider.ValueSuffix = "dB";
+            // 
             // tabControl
             // 
             tabControl.Controls.Add(waveformPage);
             tabControl.Controls.Add(leftRightWaveformPage);
+            tabControl.Controls.Add(eqWaveformPage);
             tabControl.Controls.Add(spectrogramPage);
             tabControl.Location = new Point(0, 33);
             tabControl.Name = "tabControl";
@@ -612,7 +536,7 @@
             // leftWaveformPlot
             // 
             leftWaveformPlot.DisplayScale = 1.25F;
-            leftWaveformPlot.Location = new Point(3, 2);
+            leftWaveformPlot.Location = new Point(3, 3);
             leftWaveformPlot.Name = "leftWaveformPlot";
             leftWaveformPlot.Size = new Size(1078, 226);
             leftWaveformPlot.TabIndex = 1;
@@ -625,9 +549,46 @@
             rightWaveformPlot.Size = new Size(1078, 226);
             rightWaveformPlot.TabIndex = 0;
             // 
+            // eqWaveformPage
+            // 
+            eqWaveformPage.Controls.Add(highEQplot);
+            eqWaveformPage.Controls.Add(midEQplot);
+            eqWaveformPage.Controls.Add(lowEQplot);
+            eqWaveformPage.Location = new Point(4, 29);
+            eqWaveformPage.Name = "eqWaveformPage";
+            eqWaveformPage.Size = new Size(1080, 457);
+            eqWaveformPage.TabIndex = 3;
+            eqWaveformPage.Text = "EQ Waveform";
+            eqWaveformPage.UseVisualStyleBackColor = true;
+            // 
+            // highEQplot
+            // 
+            highEQplot.DisplayScale = 1.25F;
+            highEQplot.Location = new Point(542, 228);
+            highEQplot.Name = "highEQplot";
+            highEQplot.Size = new Size(535, 226);
+            highEQplot.TabIndex = 2;
+            // 
+            // midEQplot
+            // 
+            midEQplot.DisplayScale = 1.25F;
+            midEQplot.Location = new Point(3, 228);
+            midEQplot.Name = "midEQplot";
+            midEQplot.Size = new Size(541, 226);
+            midEQplot.TabIndex = 1;
+            // 
+            // lowEQplot
+            // 
+            lowEQplot.DisplayScale = 1.25F;
+            lowEQplot.Location = new Point(3, 4);
+            lowEQplot.Name = "lowEQplot";
+            lowEQplot.Size = new Size(1074, 226);
+            lowEQplot.TabIndex = 0;
+            // 
             // spectrogramPage
             // 
-            spectrogramPage.Controls.Add(groupBox1);
+            spectrogramPage.Controls.Add(tunerGroupBox);
+            spectrogramPage.Controls.Add(fftLimitsGroupBox);
             spectrogramPage.Controls.Add(spectrumPlot);
             spectrogramPage.Location = new Point(4, 29);
             spectrogramPage.Name = "spectrogramPage";
@@ -637,83 +598,69 @@
             spectrogramPage.Text = "FFT Spectrogram";
             spectrogramPage.UseVisualStyleBackColor = true;
             // 
-            // groupBox1
+            // tunerGroupBox
             // 
-            groupBox1.BackColor = SystemColors.Control;
-            groupBox1.Controls.Add(fftHzLabel);
-            groupBox1.Controls.Add(fftDbLabel);
-            groupBox1.Controls.Add(label16);
-            groupBox1.Controls.Add(label15);
-            groupBox1.Controls.Add(fftDbTrackbar);
-            groupBox1.Controls.Add(fftHzTrackbar);
-            groupBox1.Dock = DockStyle.Right;
-            groupBox1.Location = new Point(944, 3);
-            groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(133, 451);
-            groupBox1.TabIndex = 1;
-            groupBox1.TabStop = false;
-            groupBox1.Text = "Max limits:";
+            tunerGroupBox.BackColor = SystemColors.Control;
+            tunerGroupBox.Controls.Add(toneLabel);
+            tunerGroupBox.Location = new Point(944, 3);
+            tunerGroupBox.Name = "tunerGroupBox";
+            tunerGroupBox.Size = new Size(133, 146);
+            tunerGroupBox.TabIndex = 2;
+            tunerGroupBox.TabStop = false;
+            tunerGroupBox.Text = "Tuner:";
             // 
-            // fftHzLabel
+            // toneLabel
             // 
-            fftHzLabel.AutoSize = true;
-            fftHzLabel.Location = new Point(55, 404);
-            fftHzLabel.Name = "fftHzLabel";
-            fftHzLabel.Size = new Size(71, 20);
-            fftHzLabel.TabIndex = 5;
-            fftHzLabel.Text = "20000 Hz";
+            toneLabel.Font = new Font("Segoe UI", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            toneLabel.Location = new Point(6, 23);
+            toneLabel.Name = "toneLabel";
+            toneLabel.Size = new Size(124, 89);
+            toneLabel.TabIndex = 0;
+            toneLabel.Text = "... / ...\r\n(... Hz)";
+            toneLabel.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // fftDbLabel
+            // fftLimitsGroupBox
             // 
-            fftDbLabel.AutoSize = true;
-            fftDbLabel.Location = new Point(6, 404);
-            fftDbLabel.Name = "fftDbLabel";
-            fftDbLabel.Size = new Size(39, 20);
-            fftDbLabel.TabIndex = 4;
-            fftDbLabel.Text = "3 dB";
+            fftLimitsGroupBox.BackColor = SystemColors.Control;
+            fftLimitsGroupBox.Controls.Add(fftDbSlider);
+            fftLimitsGroupBox.Controls.Add(fftHzSlider);
+            fftLimitsGroupBox.Dock = DockStyle.Bottom;
+            fftLimitsGroupBox.Location = new Point(944, 150);
+            fftLimitsGroupBox.Name = "fftLimitsGroupBox";
+            fftLimitsGroupBox.Size = new Size(133, 304);
+            fftLimitsGroupBox.TabIndex = 1;
+            fftLimitsGroupBox.TabStop = false;
+            fftLimitsGroupBox.Text = "Max limits:";
             // 
-            // label16
+            // fftDbSlider
             // 
-            label16.AutoSize = true;
-            label16.Location = new Point(9, 37);
-            label16.Name = "label16";
-            label16.Size = new Size(27, 20);
-            label16.TabIndex = 3;
-            label16.Text = "dB";
+            fftDbSlider.Location = new Point(74, 26);
+            fftDbSlider.Maximum = 3F;
+            fftDbSlider.Minimum = -37.5F;
+            fftDbSlider.Name = "fftDbSlider";
+            fftDbSlider.Orientation = Orientation.Vertical;
+            fftDbSlider.PrecisionScale = GUI.PrecisionScale.Exponential;
+            fftDbSlider.Size = new Size(53, 267);
+            fftDbSlider.TabIndex = 6;
+            fftDbSlider.Text = "precisionSlider2";
+            fftDbSlider.TickFrequency = 1;
+            fftDbSlider.Value = 3F;
+            fftDbSlider.ValueSuffix = "dB";
             // 
-            // label15
+            // fftHzSlider
             // 
-            label15.AutoSize = true;
-            label15.Location = new Point(71, 37);
-            label15.Name = "label15";
-            label15.Size = new Size(27, 20);
-            label15.TabIndex = 2;
-            label15.Text = "Hz";
-            // 
-            // fftDbTrackbar
-            // 
-            fftDbTrackbar.Location = new Point(9, 60);
-            fftDbTrackbar.Maximum = 380;
-            fftDbTrackbar.Name = "fftDbTrackbar";
-            fftDbTrackbar.Orientation = Orientation.Vertical;
-            fftDbTrackbar.Size = new Size(56, 341);
-            fftDbTrackbar.TabIndex = 1;
-            fftDbTrackbar.TickFrequency = 15;
-            fftDbTrackbar.Value = 380;
-            fftDbTrackbar.ValueChanged += fftDbTrackbar_ValueChanged;
-            // 
-            // fftHzTrackbar
-            // 
-            fftHzTrackbar.Location = new Point(71, 60);
-            fftHzTrackbar.Maximum = 200;
-            fftHzTrackbar.Minimum = 140;
-            fftHzTrackbar.Name = "fftHzTrackbar";
-            fftHzTrackbar.Orientation = Orientation.Vertical;
-            fftHzTrackbar.Size = new Size(56, 341);
-            fftHzTrackbar.TabIndex = 0;
-            fftHzTrackbar.TickFrequency = 2;
-            fftHzTrackbar.Value = 200;
-            fftHzTrackbar.ValueChanged += fftHzTrackbar_ValueChanged;
+            fftHzSlider.Location = new Point(6, 26);
+            fftHzSlider.Maximum = 16F;
+            fftHzSlider.Minimum = 10F;
+            fftHzSlider.Name = "fftHzSlider";
+            fftHzSlider.Orientation = Orientation.Vertical;
+            fftHzSlider.PrecisionScale = GUI.PrecisionScale.Linear;
+            fftHzSlider.Size = new Size(86, 267);
+            fftHzSlider.TabIndex = 5;
+            fftHzSlider.Text = "precisionSlider1";
+            fftHzSlider.TickFrequency = 10;
+            fftHzSlider.Value = 16F;
+            fftHzSlider.ValueSuffix = "kHz";
             // 
             // spectrumPlot
             // 
@@ -740,13 +687,8 @@
             Text = "Audio Processing - C#";
             FormClosing += Form1_FormClosing;
             Load += Form1_Load;
-            ((System.ComponentModel.ISupportInitialize)volumeFader).EndInit();
-            ((System.ComponentModel.ISupportInitialize)zoomSlider).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pitchSlider).EndInit();
             playbackGroupBox.ResumeLayout(false);
             playbackGroupBox.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)tempoSlider).EndInit();
-            ((System.ComponentModel.ISupportInitialize)speedSlider).EndInit();
             eqGroupBox.ResumeLayout(false);
             eqGroupBox.PerformLayout();
             menuStrip1.ResumeLayout(false);
@@ -756,11 +698,10 @@
             tabControl.ResumeLayout(false);
             waveformPage.ResumeLayout(false);
             leftRightWaveformPage.ResumeLayout(false);
+            eqWaveformPage.ResumeLayout(false);
             spectrogramPage.ResumeLayout(false);
-            groupBox1.ResumeLayout(false);
-            groupBox1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)fftDbTrackbar).EndInit();
-            ((System.ComponentModel.ISupportInitialize)fftHzTrackbar).EndInit();
+            tunerGroupBox.ResumeLayout(false);
+            fftLimitsGroupBox.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -768,24 +709,10 @@
         #endregion
 
         private ScottPlot.WinForms.FormsPlot waveformPlot;
-        private TrackBar volumeFader;
         private Label label1;
         private Label label2;
-        private Label volumeLabel;
         private Label label3;
-        private TrackBar zoomSlider;
-        private Label label4;
-        private Label zoomLabel;
-        private TrackBar pitchSlider;
         private GroupBox playbackGroupBox;
-        private Label label5;
-        private TrackBar speedSlider;
-        private Label label6;
-        private Label speedLabel;
-        private Label pitchLabel;
-        private TrackBar tempoSlider;
-        private Label label7;
-        private Label tempoLabel;
         private NAudio.Gui.Pot lowPot;
         private NAudio.Gui.Pot midPot;
         private NAudio.Gui.Pot highPot;
@@ -819,12 +746,20 @@
         private ScottPlot.WinForms.FormsPlot leftWaveformPlot;
         private ScottPlot.WinForms.FormsPlot rightWaveformPlot;
         private ScottPlot.WinForms.FormsPlot spectrumPlot;
-        private GroupBox groupBox1;
-        private TrackBar fftHzTrackbar;
-        private TrackBar fftDbTrackbar;
-        private Label label15;
-        private Label label16;
-        private Label fftDbLabel;
-        private Label fftHzLabel;
+        private GroupBox fftLimitsGroupBox;
+        private TabPage eqWaveformPage;
+        private ScottPlot.WinForms.FormsPlot highEQplot;
+        private ScottPlot.WinForms.FormsPlot midEQplot;
+        private ScottPlot.WinForms.FormsPlot lowEQplot;
+        private GroupBox tunerGroupBox;
+        private Label toneLabel;
+        private Label timeElapsedLabel;
+        private GUI.PrecisionSlider speedSlider;
+        private GUI.PrecisionSlider pitchSlider;
+        private GUI.PrecisionSlider timeSlider;
+        private GUI.PrecisionSlider zoomSlider;
+        private GUI.PrecisionSlider volumeSlider;
+        private GUI.PrecisionSlider fftHzSlider;
+        private GUI.PrecisionSlider fftDbSlider;
     }
 }

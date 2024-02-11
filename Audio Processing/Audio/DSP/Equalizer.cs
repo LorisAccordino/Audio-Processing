@@ -1,7 +1,7 @@
 ﻿using NAudio.Dsp;
 using NAudio.Wave;
 
-namespace AudioProcessing.Audio
+namespace AudioProcessing.Audio.DSP
 {
     /// <summary>
     /// Basic example of a multi-band eq
@@ -43,6 +43,14 @@ namespace AudioProcessing.Audio
             }
         }
 
+        public void SetGains(params float[] gains)
+        {
+            for (int i = 0; i < Math.Min(bands.Length, gains.Length); i++)
+            {
+                bands[i].Gain = gains[i];
+            }
+        }
+
         public void Update()
         {
             updated = true;
@@ -71,6 +79,28 @@ namespace AudioProcessing.Audio
                 }
             }
             return samplesRead;
+        }
+
+        public int ApplyToBuffer(float[] buffer)
+        {
+            //int samplesRead = sourceProvider.Read(buffer, offset, count);
+
+            if (updated)
+            {
+                CreateFilters();
+                updated = false;
+            }
+
+            for (int n = 0; n < buffer.Length; n++)
+            {
+                int ch = n % channels;
+
+                for (int band = 0; band < bandCount; band++)
+                {
+                    buffer[n] = filters[ch, band].Transform(buffer[n]);
+                }
+            }
+            return buffer.Length;
         }
     }
 }

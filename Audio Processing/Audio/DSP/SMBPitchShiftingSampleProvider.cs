@@ -61,8 +61,10 @@ public class SMBPitchShiftingSampleProvider : ISampleProvider
                 ShifterRight.PitchShift(Pitch, SampRead >> 1, _FFTSize, _osamp, WFormat.SampleRate, Right);
                 index = 0;
                 for (int sample = offset; sample <= SampRead - 1; sample += 2) {
-                    buffer[sample] = Left[index] * volscale * 0.707f;
-                    buffer[sample + 1] = Right[index] * volscale * 0.707f;
+                    //buffer[sample] = Left[index] * volscale * 0.707f;
+                    //buffer[sample + 1] = Right[index] * volscale * 0.707f;
+                    buffer[sample] = Left[index] * volscale;
+                    buffer[sample + 1] = Right[index] * volscale;
                     index += 1;
                 }
                 return SampRead;

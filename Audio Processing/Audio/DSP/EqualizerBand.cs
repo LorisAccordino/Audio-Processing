@@ -1,4 +1,4 @@
-﻿namespace AudioProcessing.Audio
+﻿namespace AudioProcessing.Audio.DSP
 {
     public class EqualizerBand
     {

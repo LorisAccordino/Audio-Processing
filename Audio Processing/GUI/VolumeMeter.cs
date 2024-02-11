@@ -1,14 +1,10 @@
-﻿using System;
-using System.ComponentModel;
-using System.Drawing;
+﻿using System.ComponentModel;
 using System.Drawing.Drawing2D;
-using System.Windows.Forms;
 
 namespace AudioProcessing.GUI
 {
     public class VolumeMeter : Control
     {
-        private Brush foregroundBrush;
         private IContainer components;
 
         private float volume;
@@ -62,12 +58,6 @@ namespace AudioProcessing.GUI
 
             InitializeComponent();
             OnForeColorChanged(EventArgs.Empty);
-        }
-
-        protected override void OnForeColorChanged(EventArgs e)
-        {
-            foregroundBrush = new SolidBrush(ForeColor);
-            base.OnForeColorChanged(e);
         }
 
         protected override void OnPaint(PaintEventArgs pe)

@@ -1,7 +1,9 @@
 ﻿using AudioProcessing.Plotting;
-using AudioProcessing;
 using AudioProcessing.GUI;
 using NAudio.Wave;
+using AudioProcessing.Audio.DSP;
+using OpenTK.Graphics.OpenGL;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AudioProcessing.Audio
 {
@@ -11,76 +13,49 @@ namespace AudioProcessing.Audio
         public const int CHUNK_SIZE = 4096;
         public const int SAMPLE_RATE = 44100;
 
-        const int FFT_SIZE = 4096;
-        const long OSAMP = 8L;
-
-        // Audio streaming and processing/mixing
-        //public ISampleProvider SourceStream { get; private set; }
-        public IWaveProvider SourceStream { get; private set; }
-        public Equalizer EQ { get; private set; }
-        public VuMeter VuMeter { get; private set; }
-        public EqualizerBand[] Bands { get; set; }
-        public SMBPitchShiftingSampleProvider SMB { get; set; }
-
-        private WaveOutEvent waveOut = new WaveOutEvent { DesiredLatency = 150, NumberOfBuffers = 3 };
-        private BufferedWaveProvider bufferedWaveProvider;
+        // Audio reading/streaming
+        public PlaybackManager PlaybackManager { get; private set; }
         private Thread readThread;
 
+        private WaveIn waveIn;
+        private WaveOut waveOut;
 
-        // Parameters
-        public float PitchFactor
-        {
-            get
-            {
-                return SMB.PitchFactor;
-            }
-            set
-            {
-                SMB.PitchFactor = value;
-            }
-        }
-        public PlaybackState PlaybackState
-        {
-            get
-            {
-                return waveOut.PlaybackState;
-            }
-            private set { }
-        }
+        // Audio processing/mixing
+        public Mixer Mixer { get; private set; }
+        public VuMeter VuMeter { get; private set; }
 
-        public float Volume { get; set; }
-        public float SpeedMultiplier { get; set; }
-        public float Pan { get; set; }
-
-        public bool IsStereo { get; set; }
-
-        //public int CurrentSample { get; set; }
-
-
+        // Plotters
         private WaveformPlotter waveformPlotter;
-        private SpectrumPlotter spectrumPlotter;
+        private FFTPlotter fftPlotter;
 
-        public AudioProcessor(ISampleProvider sourceProvider, IWaveProvider waveFileProvider, EqualizerBand[] equalizerBands, WaveformPlotter waveformPlotter, SpectrumPlotter spectrumPlotter)
+        public AudioProcessor(ISampleProvider sourceProvider, IWaveProvider waveFileProvider)
         {
-            this.waveformPlotter = waveformPlotter;
-            this.spectrumPlotter = spectrumPlotter;
+            PlaybackManager = new PlaybackManager(sourceProvider, waveFileProvider);
+            Mixer = new Mixer(PlaybackManager.SMB);
+        }
 
-            SourceStream = waveFileProvider;
-            SMB = new SMBPitchShiftingSampleProvider(sourceProvider, FFT_SIZE, OSAMP, 1.0f);
-            Bands = equalizerBands;
-            UpdateEQ();
+        private BufferedWaveProvider bufferedWaveProvider;
 
-            // Initialize buffer and wave output
-            bufferedWaveProvider = new BufferedWaveProvider(SourceStream.WaveFormat);
-            bufferedWaveProvider.BufferDuration = TimeSpan.FromSeconds(5);
+        public AudioProcessor()
+        {
+            waveIn = new WaveIn();
+            waveIn.DeviceNumber = 0;
+            waveIn.WaveFormat = new NAudio.Wave.WaveFormat(SAMPLE_RATE, 1);
+            waveIn.BufferMilliseconds = (int)((double)CHUNK_SIZE / (double)SAMPLE_RATE * 1000.0);
+            waveIn.DataAvailable += WaveIn_DataAvailable;
+
+            bufferedWaveProvider = new BufferedWaveProvider(waveIn.WaveFormat);
+            bufferedWaveProvider.BufferLength = CHUNK_SIZE * 2;
+            bufferedWaveProvider.DiscardOnBufferOverflow = true;
+
+            waveOut = new WaveOut();
             waveOut.Init(bufferedWaveProvider);
+        }
 
-            // Reset values
-            PitchFactor = 1.0f;
-            SpeedMultiplier = 1.0f;
-            Pan = 0.0f;
-            Volume = 1.0f;
-            IsStereo = true;
+        public void StartProfiling()
+        {
+            waveIn.StartRecording();
+            waveOut.Play();
         }
 
         public void Start()
@@ -90,129 +65,110 @@ namespace AudioProcessing.Audio
             readThread.Start();
         }
 
-        public void InitVuMeter(VolumeMeter leftVolume, VolumeMeter rightVolume)
+        public void AddVuMeter(VolumeMeter leftVolume, VolumeMeter rightVolume)
         {
-            // Initialize VU meter
             VuMeter = new VuMeter(leftVolume, rightVolume);
         }
 
-        public void StartPlayback()
+        public void AddPlotters(WaveformPlotter waveformPlotter, FFTPlotter fftPlotter)
         {
-            waveOut.Play();
+            this.waveformPlotter = waveformPlotter;
+            this.fftPlotter = fftPlotter;
         }
 
-        public void PausePlayback()
+        public float[] ConvertBytesToFloat(byte[] byteArray)
         {
-            waveOut.Pause();
+            // Determina il numero di byte per campione (ad esempio, 2 byte per PCM a 16 bit)
+            int bytesPerSample = 2;
+
+            // Calcola il numero di campioni nel buffer di byte
+            int numSamples = byteArray.Length / bytesPerSample;
+
+            // Inizializza l'array di float
+            float[] floatArray = new float[numSamples];
+
+            // Effettua la conversione da byte a float
+            for (int i = 0; i < numSamples; i++)
+            {
+                // Leggi il valore a 16 bit dal buffer di byte
+                short sampleValue = BitConverter.ToInt16(byteArray, i * bytesPerSample);
+
+                // Normalizza il valore a float nell'intervallo -1.0 a 1.0
+                float normalizedValue = sampleValue / 32768.0f;
+
+                // Assegna il valore normalizzato all'array di float
+                floatArray[i] = normalizedValue;
+            }
+
+            return floatArray;
         }
 
-        public void StopPlayback()
+
+        private void WaveIn_DataAvailable(object sender, WaveInEventArgs e)
         {
-            waveOut.Pause();
+            byte[] buffer = e.Buffer;
+            float[] floatBuffer = ConvertBytesToFloat(buffer);
+
+            // Apply volume and get VU meter level
+            VuMeter.ApplyVolumeAndPan(floatBuffer);
+
+            //short[] shortBuffer = ConversionUtils.ConvertFloatArrayToShortArray(floatBuffer);
+            //buffer = ConversionUtils.ConvertShortArrayToByteArray(shortBuffer);
+
+            // Apply varispeed on playback
+            //PlaybackManager.AdjustSpeed(buffer);
+
+            // Update waveforms and fft plots
+            //waveformPlotter.UpdateWaveformPlots(floatBuffer);
+            fftPlotter.UpdateFFTPlot(floatBuffer);
+            //waveformPlotter.UpdateEQplots(floatBuffer);
+
+            // Wait for the buffer to empty enough
+            /*while (PlaybackManager.IsBufferOverfull() && PlaybackManager.IsAlive())
+            {
+                Thread.Sleep(10);
+            }*/
+
+            bufferedWaveProvider.AddSamples(buffer, 0, buffer.Length);
         }
 
         private void ReadStream()
         {
             byte[] buffer = new byte[CHUNK_SIZE * sizeof(float)];
             float[] floatBuffer = new float[CHUNK_SIZE];
-            //short[] shortBuffer = new short[CHUNK_SIZE];
 
-            //while (Mixer.EQ.Read(floatBuffer, 0, floatBuffer.Length) > 0 && waveOut.PlaybackState != PlaybackState.Stopped)
-            while (EQ.Read(floatBuffer, 0, floatBuffer.Length) > 0 && waveOut.PlaybackState != PlaybackState.Stopped)
+            while (Mixer.Read(floatBuffer, 0, floatBuffer.Length) > 0 && PlaybackManager.IsAlive())
             {
-
-                // Wait for resume
-                /*while (waveOut.PlaybackState == PlaybackState.Paused)
-                {
-                    Thread.Sleep(10);
-                }*/
-
                 // Apply volume and get VU meter level
-                VuMeter.ApplyVolumeAndPan(floatBuffer, Volume, Pan, IsStereo);
+                VuMeter.ApplyVolumeAndPan(floatBuffer);
 
                 short[] shortBuffer = ConversionUtils.ConvertFloatArrayToShortArray(floatBuffer);
                 buffer = ConversionUtils.ConvertShortArrayToByteArray(shortBuffer);
 
+                // Apply varispeed on playback
+                PlaybackManager.AdjustSpeed(buffer);
 
-                // Apply speed on playback
-                byte[] resampledBuffer = VarispeedPlayback(buffer, (double)SpeedMultiplier);
-
-                // Update waveforms and spectrum plots
+                // Update waveforms and fft plots
                 waveformPlotter.UpdateWaveformPlots(floatBuffer);
-                spectrumPlotter.UpdateSpectrumPlot(floatBuffer);
+                fftPlotter.UpdateFFTPlot(floatBuffer);
+                waveformPlotter.UpdateEQplots(floatBuffer);
 
-                // Wait for resume
-                while (waveOut.PlaybackState == PlaybackState.Paused)
+                // Wait for the buffer to empty enough
+                while (PlaybackManager.IsBufferOverfull() && PlaybackManager.IsAlive())
                 {
                     Thread.Sleep(10);
                 }
-
-
-                if (bufferedWaveProvider.BufferedBytes > bufferedWaveProvider.BufferLength / 10)
-                {
-                    Thread.Sleep(65);
-                }
-                Thread.Sleep(10);
             }
-            waveOut.Stop();
         }
 
-
-
-        private byte[] VarispeedPlayback(byte[] data, double PlaybackRate)
+        private void UpdateEQ(EqualizerBand[] equalizerBands)
         {
-            if (bufferedWaveProvider != null)
-            {
-                if (Math.Abs(PlaybackRate - 1) > double.Epsilon)
-                {
-                    // Resample audio if playback speed changed
-                    var newRate = Convert.ToInt32(SourceStream.WaveFormat.SampleRate / PlaybackRate);
-                    var wf = new WaveFormat(newRate, 16, SourceStream.WaveFormat.Channels);
-                    var resampleInputMemoryStream = new MemoryStream(data) { Position = 0 };
-
-                    WaveStream ws = new RawSourceWaveStream(resampleInputMemoryStream, SourceStream.WaveFormat);
-                    var wfcs = new WaveFormatConversionStream(wf, ws) { Position = 0 };
-                    var b = new byte[ws.WaveFormat.AverageBytesPerSecond];
-
-                    int bo = wfcs.Read(b, 0, ws.WaveFormat.AverageBytesPerSecond);
-                    while (bo > 0)
-                    {
-                        bufferedWaveProvider.AddSamples(b, 0, bo);
-                        bo = wfcs.Read(b, 0, ws.WaveFormat.AverageBytesPerSecond);
-                    }
-
-                    wfcs.Dispose();
-                    ws.Dispose();
-
-                    return b;
-                }
-                else
-                {
-                    bufferedWaveProvider.AddSamples(data, 0, data.Length);
-                }
-            }
-
-            return data;
+            throw new NotImplementedException();
         }
-
-        private void UpdateEQ()
-        {
-            EQ = new Equalizer(SMB, Bands);
-        }
-
-        public void UpdateEQ(EqualizerBand[] bands)
-        {
-            Bands = bands;
-            EQ = new Equalizer(SMB, Bands);
-        }
-
 
         public void Close()
         {
-            // Make sure to stop audio output and dispose resources before closing the application
-            waveOut.Stop();
-            waveOut.Dispose();
-
+            PlaybackManager.Close();
             // Wait for the read thread to finish before closing the form
             readThread.Join();
         }
