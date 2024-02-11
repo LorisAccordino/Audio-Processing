@@ -23,11 +23,16 @@ Audio Processing is an advanced audio analysis and processing application design
 - Libraries: [NAudio](https://github.com/naudio/NAudio), [ScottPlot](https://github.com/ScottPlot/ScottPlot)
 
 ## Custom Controls
+<img align="right" src="docs/img/volume-meter.png" alt="VolumeMeter" height="250px">
+
 ### PrecisionSlider
+
 The PrecisionSlider is a custom slider (trackbar) designed to provide float precision, a customizable interval (even allowing negative values), and the flexibility of linear, logarithmic, or exponential scales.
 
 ### VolumeMeter
+
 The VolumeMeter is a VuMeter that accurately measures volume in a logarithmic dB scale, offering precise monitoring similar to analog or digital vu meters.
+
 
 ## Known Issues
 
