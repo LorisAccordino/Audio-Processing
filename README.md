@@ -20,6 +20,44 @@ Audio Processing is an advanced audio analysis and processing application design
 - **Tuner:** Analyze and determine the current musical note using FFT.
 
 ## Graphs Features
+<table align="right">
+  <tr>
+    <td>
+      <img src="docs/gif/zoom.gif" alt="Zoom" height="125px">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="docs/gif/volume.gif" alt="Volume" height="125px">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="docs/gif/mono-stereo.gif" alt="Mono/Stereo" height="125px">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="docs/gif/playback.gif" alt="Playback" height="125px">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="docs/gif/pan.gif" alt="Pan" height="125px">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img align="right" src="docs/gif/eq.gif" alt="EQ" height="125px">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img align="right" src="docs/gif/fft.gif" alt="FFT" height="125px">
+    </td>
+  </tr>
+</table>
+
 The graphs in Audio Processing offer a range of powerful features to enhance your audio analysis experience.
 ### Waveform Graph
 Visualize audio waveforms in real-time, using both mono and stereo visualization or EQ visualization. Equalization, time-stretching, pitch-shifting, zoom and other effects are handled and displayed on every graph and specific graphs.
