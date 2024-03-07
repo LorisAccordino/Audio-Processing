@@ -96,7 +96,7 @@ Per esempio:
 
 In pratica, la scala logaritmica dei decibel consente di rappresentare in modo efficace variazioni di volume relativamente piccole, adattandosi bene alla nostra percezione non lineare del suono.
 
-# Esplorazione Pratica:
+# Esplorazione Pratica con Audio Processing:
 Utilizzando Audio Processing, esploreremo la forma d'onda di un file audio WAV. Questo ci darà una visione visiva della rappresentazione digitale del suono, evidenziando come le variazioni nell'ampiezza siano catturate dai campioni. Inoltre, sperimentando con equalizzazione, variazioni di pitch, velocità e tempo, vedremo come queste manipolazioni influenzano la forma d'onda e, di conseguenza, il suono che ascoltiamo.
 
 Questa introduzione alle basi dell'audio digitale ci fornirà una solida base per comprendere come le funzioni sinusoidali e le trasformazioni matematiche si integrino nel nostro viaggio attraverso il suono e la tecnologia.
@@ -183,11 +183,23 @@ $$
 
 Quindi, se vogliamo mantenere costante il pitch mentre cambiamo la velocità, dobbiamo regolare il pitch in modo inversamente proporzionale alla velocità desiderata, in modo da compensare il cambio di tonalità causato dalla variazione del sample rate. Questo ci consentirà di ottenere l'effetto desiderato di velocizzazione o rallentamento senza alterare l'intonazione del suono.
 
-### Equalizzazione e Spettro Frequenziale
-Introdurremo la rappresentazione spettrale della forma d'onda, suddividendo il suono in fasce di frequenza. Esploreremo le trasformazioni attraverso low (bassi), mid (medi) e high (alti), comprendendo il concetto di equalizzazione (EQ) e il suo impatto sulla timbrica del suono.
+## Equalizzazione
+La rappresentazione spettrale di una forma d'onda ci consente di suddividere il suono in diverse fasce di frequenza, aprendo la strada all'equalizzazione (EQ). L'equalizzazione è una tecnica che manipola l'ampiezza di specifiche bande di frequenza per alterare la timbrica del suono. Questo processo è essenziale per adattare e ottimizzare l'ascolto in base alle preferenze personali o alle esigenze di una particolare registrazione.
 
-Questa introduzione alle basi dell'audio digitale ci fornirà una solida base per comprendere come le funzioni sinusoidali e le trasformazioni matematiche si integrino nel nostro viaggio attraverso il suono e la tecnologia.
+Le trasformazioni attraverso le bande di frequenza, come i toni bassi (low), medi (mid), e alti (high), sono fondamentali per modellare il profilo sonoro.
 
+### Filtri e Trasformazioni Frequenziali
+I filtri sono dispositivi essenziali nell'elaborazione del segnale audio, poiché consentono il controllo selettivo delle frequenze. Esistono diversi tipi di filtri, ciascuno progettato per modificare specifiche caratteristiche dello spettro sonoro. Vediamo alcune categorie principali:
+
+- **Passa Basso:** Favorisce le frequenze più basse, attenuando quelle più alte. È come se lasciasse passare le basse frequenze, da cui il nome "passa basso".
+
+- **Passa Alto:** Fa il contrario del passa basso, consentendo il passaggio delle frequenze più alte e attenuando quelle più basse.
+
+- **Passa Banda:** Permette solo il passaggio di un intervallo specifico di frequenze, attenuando sia quelle più basse che quelle più alte.
+
+- **Reiezione di Banda:** Fa il contrario del passa banda, attenuando solo un intervallo specifico di frequenze e lasciando passare le altre.
+
+Questi filtri sono fondamentali per modellare il suono, e la loro applicazione pratica coinvolge l'utilizzo di algoritmi e tecniche di elaborazione del segnale per ottenere gli effetti desiderati. Sono una componente chiave nella creazione di equalizzatori e nella manipolazione delle caratteristiche timbriche del suono.
 
 ## Analisi spettrale con FFT
 La Trasformata di Fourier Rapida (FFT) è un algoritmo che consente di scomporre un segnale nel dominio della frequenza. In termini semplici, ci permette di analizzare un segnale audio e individuare le diverse componenti spettrali che lo compongono.
@@ -219,30 +231,14 @@ Il funzionamento dell'accordatore si basa su una suddivisione delle componenti s
 
 In termini pratici, se stai accordando uno strumento, l'accordatore analizzerà il suono prodotto e indicherà quale frequenza stai effettivamente suonando. Questo consente di regolare l'accordatura dello strumento in modo preciso e accurato.
 
-## Sezione 2: Esperimenti nel campo delle telecomunicazioni ed elettronica
+# Esplorazione Pratica con il mixer
 
-### Esperimenti con il mixer
+Nel vasto campo dell'audio analogico, l'audio in sé è solo uno dei molti tipi di segnali con cui si può interagire. Gli strumenti come un oscilloscopio ci permettono di catturare e analizzare qualsiasi onda elettromagnetica o segnale, aprendo la porta a un mondo di possibilità oltre alla musica.
 
-Ora ci sposteremo nel campo delle telecomunicazioni ed elettronica attraverso esperimenti pratici con un mixer. Esploreremo la possibilità di utilizzare un jack come antenna, catturando segnali intriganti come i disturbi a 50Hz della corrente alternata. Un'immersione nel lato più tecnologico e applicato delle onde sonore.
+Immagina di toccare un cavo poco schermato, o il cui segnale è addirittura amplificato, collegato a un dispositivo audio, o, più genericamente, un oscilloscopio. In questo caso, potremmo fare da antenna per varie frequenze, in base alla "lunghezza d'onda" del nostro corpo. Un esempio affascinante di questo fenomeno è rappresentato dai disturbi a 50Hz provenienti dalla corrente alternata della bassa tensione (corrente degli impianti di ambito domestico). Se tocchiamo per terra con un jack, possiamo percepire chiaramente l'onda pura a 50Hz, dimostrando come il nostro corpo possa agire da antenna per diverse frequenze.
 
-### Sintesi sonora e segnali complessi
+Questi esperimenti ci svelano un lato affascinante dell'audio e dei segnali, mostrandoci che la musica è solo una parte di un universo più ampio che abbraccia elettronica, telecomunicazioni e tutte le sfaccettature connesse all'analisi e alla manipolazione dei segnali. L'audio analogico, dunque, si rivela come un campo ricco di connessioni tra la teoria elettronica e le applicazioni pratiche, dove la musica è solo uno dei tanti modi per esplorare la vastità di questo mondo intrigante.
 
-Continuando il nostro viaggio, ci addentreremo in un "sintetizzatore" in grado di generare segnali complessi sommando funzioni come sinusoidi, onde quadre, triangolari e dente di sega. Questo ci permetterà di esplorare come la combinazione di diverse funzioni possa dare vita a suoni unici e affascinanti, unendo la teoria matematica alle applicazioni pratiche.
-
-## Sezione 3: Approfondimenti matematici
-
-### Approfondimento sulla matematica dietro le trasformazioni
-
-A questo punto, approfondiremo la matematica che sta dietro alle trasformazioni applicate: pitch, speed, FFT. Esploreremo come queste trasformazioni si collegano alle funzioni sinusoidali e alle equazioni matematiche coinvolte. Discuteremo anche le differenze tra rappresentazioni audio analogiche e digitali, comprendendo come l'audio venga trattato in un mixer e in un formato WAV PCM a 16 bit.
-
-## Conclusione
+# Conclusione
 
 In chiusura, abbiamo esplorato la vastità delle funzioni sinusoidali, passando dai concetti matematici alla loro applicazione pratica nel mondo del suono e della tecnologia. Spero che questa presentazione abbia aperto nuove prospettive e ispirato ulteriori esplorazioni in questo affascinante campo.
-
-## Possibili approfondimenti futuri
-
-### Spunti per ulteriori ricerche e sperimentazioni
-
-Infine, invito tutti a considerare le possibilità future. Questo è solo l'inizio, e molte altre aree affascinanti attendono esplorazioni nel connubio tra matematica, suono e tecnologia. Ci sono opportunità per ulteriori ricerche e sperimentazioni che potrebbero portare a nuove scoperte e applicazioni innovative. Vi invito a esplorare e ad alimentare la vostra curiosità.
-
-Spero che questo viaggio stimoli la vostra mente e apra nuovi orizzonti di conoscenza! Sentitevi liberi di adattare e modificare il testo in base alle esigenze specifiche della vostra presentazione. Buon viaggio!
