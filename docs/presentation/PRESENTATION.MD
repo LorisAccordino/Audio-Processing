@@ -200,8 +200,8 @@ $$
 
 Dove:
 
-- $ X(k)$ rappresenta l'ampiezza della componente di frequenza $k$,
-- $ x(n)$ è il campione del segnale nel dominio del tempo all'istante $n$,
+- $ X{(k)} $ rappresenta l'ampiezza della componente di frequenza $k$,
+- $ x({n}) $ è il campione del segnale nel dominio del tempo all'istante $n$,
 - $e$ è il numero di Nepero (base del logaritmo naturale),
 - $i$ è l'unità immaginaria,
 - $N$ è il numero totale di campioni nel segnale.
