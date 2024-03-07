@@ -12,7 +12,13 @@ La frequenza è la grandezza fisica che esprime il numero di cicli o oscillazion
 
 <!-- $f = {1 \over T}$ -->
 
-![equation](https://latex.codecogs.com/svg.image?&space;f={1\over&space;T})
+$f = {1 \over T}$
+
+$$
+  \int_0^\infty \frac{x^3}{e^x-1}\,dx = \frac{\pi^4}{15}
+$$
+
+<!-- ![equation](https://latex.codecogs.com/svg.image?&space;f={1\over&space;T}) -->
 
 Dove:
 
