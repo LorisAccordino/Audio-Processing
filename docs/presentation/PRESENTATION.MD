@@ -12,6 +12,8 @@ La frequenza è la grandezza fisica che esprime il numero di cicli o oscillazion
 
 $f = {1 \over T}$
 
+![equation](https://latex.codecogs.com/svg.image?&space;f={1\over&space;T})
+
 Dove:
 
 - $f$ rappresenta la frequenza,
