@@ -3,14 +3,10 @@
 [![Beta Version](https://img.shields.io/badge/Version-Beta-green.svg)]()\
 Audio Processing is an advanced audio analysis and processing application designed to provide a wide range of features for audio enthusiasts and professionals.
 
-<<<<<<< HEAD
-<img src="docs/gif/waveform.gif" alt="Playback" height="175px"> <img src="docs/gif/fft.gif" alt="Playback" height="175px">
-=======
 <div align="center">
-  <img src="docs/gif/playback.gif" width="45%"/> 
-  <img src="docs/gif/fft.gif" width="45%"/>
+  <img src="docs/gif/waveform.gif" alt="Waveform" width="45%">
+  <img src="docs/gif/fft.gif" alt="FFT" width="45%">
 </div>
->>>>>>> 5d7fe6b895bbec3d3e4f5ae6cc383fae49597875
 
 ## Key Features
 - **Waveform Graphs:** Visualize audio waveforms in real-time.
