@@ -96,7 +96,7 @@ Per esempio:
 
 In pratica, la scala logaritmica dei decibel consente di rappresentare in modo efficace variazioni di volume relativamente piccole, adattandosi bene alla nostra percezione non lineare del suono.
 
-# Esplorazione Pratica con Audio Processing:
+# Esplorazione Pratica:
 Utilizzando Audio Processing, esploreremo la forma d'onda di un file audio WAV. Questo ci darà una visione visiva della rappresentazione digitale del suono, evidenziando come le variazioni nell'ampiezza siano catturate dai campioni. Inoltre, sperimentando con equalizzazione, variazioni di pitch, velocità e tempo, vedremo come queste manipolazioni influenzano la forma d'onda e, di conseguenza, il suono che ascoltiamo.
 
 Questa introduzione alle basi dell'audio digitale ci fornirà una solida base per comprendere come le funzioni sinusoidali e le trasformazioni matematiche si integrino nel nostro viaggio attraverso il suono e la tecnologia.
@@ -231,8 +231,7 @@ Il funzionamento dell'accordatore si basa su una suddivisione delle componenti s
 
 In termini pratici, se stai accordando uno strumento, l'accordatore analizzerà il suono prodotto e indicherà quale frequenza stai effettivamente suonando. Questo consente di regolare l'accordatura dello strumento in modo preciso e accurato.
 
-# Esplorazione Pratica con il mixer
-
+## Oltre la Musica: la vastità degli Segnali Analogici
 Nel vasto campo dell'audio analogico, l'audio in sé è solo uno dei molti tipi di segnali con cui si può interagire. Gli strumenti come un oscilloscopio ci permettono di catturare e analizzare qualsiasi onda elettromagnetica o segnale, aprendo la porta a un mondo di possibilità oltre alla musica.
 
 Immagina di toccare un cavo poco schermato, o il cui segnale è addirittura amplificato, collegato a un dispositivo audio, o, più genericamente, un oscilloscopio. In questo caso, potremmo fare da antenna per varie frequenze, in base alla "lunghezza d'onda" del nostro corpo. Un esempio affascinante di questo fenomeno è rappresentato dai disturbi a 50Hz provenienti dalla corrente alternata della bassa tensione (corrente degli impianti di ambito domestico). Se tocchiamo per terra con un jack, possiamo percepire chiaramente l'onda pura a 50Hz, dimostrando come il nostro corpo possa agire da antenna per diverse frequenze.
@@ -240,5 +239,4 @@ Immagina di toccare un cavo poco schermato, o il cui segnale è addirittura ampl
 Questi esperimenti ci svelano un lato affascinante dell'audio e dei segnali, mostrandoci che la musica è solo una parte di un universo più ampio che abbraccia elettronica, telecomunicazioni e tutte le sfaccettature connesse all'analisi e alla manipolazione dei segnali. L'audio analogico, dunque, si rivela come un campo ricco di connessioni tra la teoria elettronica e le applicazioni pratiche, dove la musica è solo uno dei tanti modi per esplorare la vastità di questo mondo intrigante.
 
 # Conclusione
-
 In chiusura, abbiamo esplorato la vastità delle funzioni sinusoidali, passando dai concetti matematici alla loro applicazione pratica nel mondo del suono e della tecnologia. Spero che questa presentazione abbia aperto nuove prospettive e ispirato ulteriori esplorazioni in questo affascinante campo.
