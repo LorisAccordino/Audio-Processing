@@ -1,5 +1,4 @@
 ﻿using AudioProcessing.Events;
-using NAudio.Wave;
 using System.ComponentModel;
 
 namespace AudioProcessing.GUI
@@ -261,13 +260,6 @@ namespace AudioProcessing.GUI
 
                     isUpdatingValue = false;
                 }
-
-
-                //Value = CalculateInternalValue(trackBar.Value);
-                //internalValue = CalculateInternalValue(trackBar.Value);
-
-                //UpdateValueLabel();
-                //OnValueChanged(new ValueChangedEventArgs(Value));
             };
             Resize += (sender, e) => AdjustControls();
 

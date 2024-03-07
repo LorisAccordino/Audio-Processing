@@ -35,6 +35,43 @@
             }
 
             // Reference frequency for A4 (La4) in Hz
+            //double referenceFrequency = 440.0;
+            double referenceFrequency = 261.6;
+
+            // Calculate semitone difference compared to A4
+            double semitoneDifference = 12.0 * Math.Log2(frequency / referenceFrequency);
+
+            // Semitone mapping to note
+            string[] noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+
+            int noteIndex = (int)Math.Round(semitoneDifference) % 12;
+            if (noteIndex < 0)
+            {
+                noteIndex += 12;
+            }
+
+            //int octave = 4 + (int)Math.Floor((semitoneDifference + 9) / 12); // A4 is in the 4th octave
+            int octave = 4 + (int)Math.Floor((semitoneDifference) / 12); // A4 is in the 4th octave
+
+            // Format note as string
+            string formattedNote = $"{noteNames[noteIndex]}{octave}";
+
+            // Add Italian note name (e.g., "C" -> "DO")
+            string italianNoteName = TranslateToItalian(noteNames[noteIndex]);
+            formattedNote += $" / {italianNoteName}{octave}";
+
+            // Return the formatted string with frequency and note (limited to 1 decimal place)
+            return $"{formattedNote} ({frequency:F1} Hz)";
+        }
+
+        /*private string FrequencyToNote(double frequency)
+        {
+            if (frequency <= 0)
+            {
+                return "Invalid frequency";
+            }
+
+            // Reference frequency for A4 (La4) in Hz
             double referenceFrequency = 440.0;
 
             // Calculate semitone difference compared to A4
@@ -49,7 +86,7 @@
                 noteIndex += 12;
             }
 
-            int octave = 4 + (int)Math.Floor((semitoneDifference + 9) / 12); // A4 is in the 4th octave
+            int octave = 4 + (int)Math.Floor(semitoneDifference / 12.0); // Aggiustamento dell'ottava
 
             // Format note as string
             string formattedNote = $"{noteNames[noteIndex]}{octave}";
@@ -58,9 +95,9 @@
             string italianNoteName = TranslateToItalian(noteNames[noteIndex]);
             formattedNote += $" / {italianNoteName}{octave}";
 
-            // Return the formatted string with frequency and note (limited to 1 decimal place)
-            return $"{formattedNote} ({frequency:F1} Hz)";
-        }
+            return formattedNote;
+        }*/
+
 
         private string TranslateToItalian(string englishNoteName)
         {

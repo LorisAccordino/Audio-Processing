@@ -44,7 +44,7 @@ namespace AudioProcessing.Audio.DSP
 
             for (int i = 0; i < spectrum.Length; i++)
             {
-                // Calcola la magnitudine in dB
+                // Calculate the magnitude in dB
                 spectrum[i] = 20 * Math.Log10(fftResult[i].Magnitude);
             }
 

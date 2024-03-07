@@ -2,8 +2,6 @@
 using AudioProcessing.GUI;
 using NAudio.Wave;
 using AudioProcessing.Audio.DSP;
-using OpenTK.Graphics.OpenGL;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AudioProcessing.Audio
 {
@@ -12,13 +10,13 @@ namespace AudioProcessing.Audio
         // Consts
         public const int CHUNK_SIZE = 4096;
         public const int SAMPLE_RATE = 44100;
+        public const int CHANNELS = 2;
+
+        public static readonly WaveFormat WAVE_FORMAT = new WaveFormat(SAMPLE_RATE, CHANNELS);
 
         // Audio reading/streaming
         public PlaybackManager PlaybackManager { get; private set; }
         private Thread readThread;
-
-        private WaveIn waveIn;
-        private WaveOut waveOut;
 
         // Audio processing/mixing
         public Mixer Mixer { get; private set; }
@@ -28,34 +26,10 @@ namespace AudioProcessing.Audio
         private WaveformPlotter waveformPlotter;
         private FFTPlotter fftPlotter;
 
-        public AudioProcessor(ISampleProvider sourceProvider, IWaveProvider waveFileProvider)
+        public AudioProcessor(ISampleProvider sourceProvider)
         {
-            PlaybackManager = new PlaybackManager(sourceProvider, waveFileProvider);
+            PlaybackManager = new PlaybackManager(sourceProvider, WAVE_FORMAT);
             Mixer = new Mixer(PlaybackManager.SMB);
-        }
-
-        private BufferedWaveProvider bufferedWaveProvider;
-
-        public AudioProcessor()
-        {
-            waveIn = new WaveIn();
-            waveIn.DeviceNumber = 0;
-            waveIn.WaveFormat = new NAudio.Wave.WaveFormat(SAMPLE_RATE, 1);
-            waveIn.BufferMilliseconds = (int)((double)CHUNK_SIZE / (double)SAMPLE_RATE * 1000.0);
-            waveIn.DataAvailable += WaveIn_DataAvailable;
-
-            bufferedWaveProvider = new BufferedWaveProvider(waveIn.WaveFormat);
-            bufferedWaveProvider.BufferLength = CHUNK_SIZE * 2;
-            bufferedWaveProvider.DiscardOnBufferOverflow = true;
-
-            waveOut = new WaveOut();
-            waveOut.Init(bufferedWaveProvider);
-        }
-
-        public void StartProfiling()
-        {
-            waveIn.StartRecording();
-            waveOut.Play();
         }
 
         public void Start()
@@ -103,35 +77,6 @@ namespace AudioProcessing.Audio
             return floatArray;
         }
 
-
-        private void WaveIn_DataAvailable(object sender, WaveInEventArgs e)
-        {
-            byte[] buffer = e.Buffer;
-            float[] floatBuffer = ConvertBytesToFloat(buffer);
-
-            // Apply volume and get VU meter level
-            VuMeter.ApplyVolumeAndPan(floatBuffer);
-
-            //short[] shortBuffer = ConversionUtils.ConvertFloatArrayToShortArray(floatBuffer);
-            //buffer = ConversionUtils.ConvertShortArrayToByteArray(shortBuffer);
-
-            // Apply varispeed on playback
-            //PlaybackManager.AdjustSpeed(buffer);
-
-            // Update waveforms and fft plots
-            //waveformPlotter.UpdateWaveformPlots(floatBuffer);
-            fftPlotter.UpdateFFTPlot(floatBuffer);
-            //waveformPlotter.UpdateEQplots(floatBuffer);
-
-            // Wait for the buffer to empty enough
-            /*while (PlaybackManager.IsBufferOverfull() && PlaybackManager.IsAlive())
-            {
-                Thread.Sleep(10);
-            }*/
-
-            bufferedWaveProvider.AddSamples(buffer, 0, buffer.Length);
-        }
-
         private void ReadStream()
         {
             byte[] buffer = new byte[CHUNK_SIZE * sizeof(float)];
@@ -148,16 +93,23 @@ namespace AudioProcessing.Audio
                 // Apply varispeed on playback
                 PlaybackManager.AdjustSpeed(buffer);
 
+                floatBuffer = ConvertBytesToFloat(buffer);
+
                 // Update waveforms and fft plots
                 waveformPlotter.UpdateWaveformPlots(floatBuffer);
-                fftPlotter.UpdateFFTPlot(floatBuffer);
-                waveformPlotter.UpdateEQplots(floatBuffer);
+                fftPlotter.UpdateFFTPlot(floatBuffer, PlaybackManager.PlaybackSpeed);
 
                 // Wait for the buffer to empty enough
                 while (PlaybackManager.IsBufferOverfull() && PlaybackManager.IsAlive())
                 {
                     Thread.Sleep(10);
                 }
+
+
+                // TO TEST!!!
+                float speed = PlaybackManager.PlaybackSpeed;
+                int dynamicChunkSize = (int)((CHUNK_SIZE * speed) / 4) * 4;
+                floatBuffer = new float[dynamicChunkSize];
             }
         }
 

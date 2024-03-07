@@ -8,6 +8,9 @@ namespace AudioProcessing.Plotting
 {
     public class FFTPlotter
     {
+        private const int MAX_QUEUE_SIZE = 4;
+
+        private Queue<float[]> audioDataQueue = new Queue<float[]>();
         private FastFourierTransform fft;
         private Tuner tuner;
 
@@ -36,16 +39,6 @@ namespace AudioProcessing.Plotting
             {
                 FormsPlot.Plot.Axes.SetLimitsX(0, value);
             }
-        }
-
-        public void DbLimitsChanged(object? sender, ValueChangedEventArgs e)
-        {
-            MaxDbRange = e.NewValue;
-        }
-
-        public void HzLimitsChanged(object? sender, ValueChangedEventArgs e)
-        {
-            MaxHzRange = e.NewValue * 1000f;
         }
 
         public FFTPlotter(FormsPlot formsPlot, int sampleRate)
@@ -79,9 +72,22 @@ namespace AudioProcessing.Plotting
             tuner = new Tuner(toneLabel);
         }
 
-        public void UpdateFFTPlot(float[] audioData)
+        public void UpdateFFTPlot(float[] audioData, float speed)
         {
-            FastFourierTransform.FFTResult fFTResult = fft.ComputeFFT(audioData);
+            // Add the new frame to the queue
+            audioDataQueue.Enqueue(audioData);
+
+            // If the queue has reached the max size, remove the oldest frame
+            if (audioDataQueue.Count > (int)Math.Clamp(MAX_QUEUE_SIZE * speed, 0.01, 4))
+            {
+                audioDataQueue.Dequeue();
+            }
+
+            // Calculate FFT on queue of audio frames
+            float[] concatenatedData = audioDataQueue.SelectMany(data => data).ToArray();
+
+            //FastFourierTransform.FFTResult fFTResult = fft.ComputeFFT(audioData);
+            FastFourierTransform.FFTResult fFTResult = fft.ComputeFFT(concatenatedData);
 
             // Update plot
             for (int i = 0; i < fFTResult.frequencies.Length / 2; i++)

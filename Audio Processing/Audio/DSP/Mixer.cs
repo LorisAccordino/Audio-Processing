@@ -1,5 +1,4 @@
 ﻿using NAudio.Wave;
-using OpenTK.Graphics.OpenGL;
 
 namespace AudioProcessing.Audio.DSP
 {
@@ -18,7 +17,12 @@ namespace AudioProcessing.Audio.DSP
             return equalizer.Read(buffer, offset, count);
         }
 
-
+        public enum AudioChannel
+        {
+            STEREO,
+            LEFT_CHANNEL,
+            RIGHT_CHANNEL,
+        }
 
         public static readonly EqualizerBand[] ISOLATED_LOW =
         {
@@ -132,6 +136,14 @@ namespace AudioProcessing.Audio.DSP
                 gains[i] = bands[i].Gain;
             }
             return gains;
+        }
+
+        public void UpdateGain(float gain, int index)
+        {
+            float[] gains = GetGains();
+            gains[index] = gain;
+
+            UpdateGains(gains);
         }
 
         public void UpdateGains(params float[] gains)

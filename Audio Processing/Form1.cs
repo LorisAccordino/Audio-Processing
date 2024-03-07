@@ -1,7 +1,9 @@
 ﻿using AudioProcessing.Audio;
+using AudioProcessing.Audio.DSP;
+using AudioProcessing.Events;
 using AudioProcessing.Plotting;
 using NAudio.Wave;
-using System.Formats.Tar;
+using static AudioProcessing.Audio.SignalFunction;
 
 namespace AudioProcessing
 {
@@ -9,6 +11,9 @@ namespace AudioProcessing
     {
         // Audio processor
         private AudioProcessor audioProcessor;
+
+        // Synthesizer
+        private Synthesizer synthesizer;
 
         // Plotters
         private WaveformPlotter waveformPlotter;
@@ -20,31 +25,35 @@ namespace AudioProcessing
             InitializeComponent();
 
             // Initialize plotters
-            waveformPlotter = new WaveformPlotter(waveformPlot, leftWaveformPlot, rightWaveformPlot);
-            waveformPlotter.AddEQplots(lowEQplot, midEQplot, highEQplot);
-
-            fftPlotter = new FFTPlotter(spectrumPlot, 44100);
-            fftPlotter.AddTuner(toneLabel);
+            InitializePlotters();
         }
 
         private void AddEventHandlers()
         {
+            speedSlider.Tag = new Action<float>(value => audioProcessor.PlaybackManager.PlaybackSpeed = value);
+            pitchSlider.Tag = new Action<float>(value => audioProcessor.PlaybackManager.PitchFactor = value);
+            timeSlider.Tag = new Action<float>(value => audioProcessor.PlaybackManager.TimeStrech = value);
+            zoomSlider.Tag = new Action<float>(value => waveformPlotter.Zoom = (int)Math.Max(1.0f, value));
+            volumeSlider.Tag = new Action<float>(value => audioProcessor.VuMeter.Volume = VuMeter.LogVolumeToLinearVolume(value));
+            fftDbSlider.Tag = new Action<float>(value => fftPlotter.MaxDbRange = value);
+            fftHzSlider.Tag = new Action<float>(value => fftPlotter.MaxHzRange = value * 1000);
+
+            panPot.Tag = new Action<float>(value => audioProcessor.VuMeter.Pan = value);
+            lowPot.Tag = new Action<float>(value => audioProcessor.Mixer.UpdateGain(value, lowPot.PotIndex));
+            midPot.Tag = new Action<float>(value => audioProcessor.Mixer.UpdateGain(value, midPot.PotIndex));
+            highPot.Tag = new Action<float>(value => audioProcessor.Mixer.UpdateGain(value, highPot.PotIndex));
+
+            isStereoCheckbox.Tag = new Action<bool>(value => audioProcessor.VuMeter.IsStereo = value);
+
+            EventsUtils.AttachValueChangedEvent(this);
+
             tabControl.SelectedIndexChanged += waveformPlotter.UpdateCurrentPlotTab;
 
-            speedSlider.ValueChanged += audioProcessor.PlaybackManager.SpeedChanged;
-            pitchSlider.ValueChanged += audioProcessor.PlaybackManager.PitchChanged;
-            timeSlider.ValueChanged += audioProcessor.PlaybackManager.TimeChanged;
             timeSlider.ValueChanged += (sender, e) =>
             {
                 speedSlider.Value = audioProcessor.PlaybackManager.PlaybackSpeed;
-                pitchSlider.Value = audioProcessor.PlaybackManager.SMB.PitchFactor * 100;
+                pitchSlider.Value = audioProcessor.PlaybackManager.SMB.PitchFactor;
             };
-            zoomSlider.ValueChanged += waveformPlotter.ZoomChanged;
-
-            volumeSlider.ValueChanged += audioProcessor.VuMeter.VolumeChanged;
-
-            fftDbSlider.ValueChanged += fftPlotter.DbLimitsChanged;
-            fftHzSlider.ValueChanged += fftPlotter.HzLimitsChanged;
 
             audioProcessor.PlaybackManager.PlaybackStopped += (sender, e) =>
             {
@@ -62,16 +71,18 @@ namespace AudioProcessing
             volumeGroupBox.Enabled = enabled;
             fftLimitsGroupBox.Enabled = enabled;
             tunerGroupBox.Enabled = enabled;
-            openToolStripMenuItem.Enabled = !enabled;
+            wavTSMI.Enabled = !enabled;
 
             ResetComponents();
         }
 
         public void ResetComponents()
         {
+            tabControl.SelectedIndex = 0;
+
             zoomSlider.Value = 1;
             speedSlider.Value = 1;
-            pitchSlider.Value = 100;
+            pitchSlider.Value = 1;
             timeSlider.Value = 1;
             volumeSlider.Value = 0;
 
@@ -89,24 +100,124 @@ namespace AudioProcessing
             fftPlotter.Clear();
         }
 
-        private void InitializeAudio(string wavFile)
+        private void InitializePlotters()
         {
+            // Waveform plotter
+            waveformPlotter = new WaveformPlotter();
+
+            // Add waveforms
+            waveformPlotter.AddWaveformPlot(stereoPlot, "Waveform (Stereo)", Mixer.AudioChannel.STEREO);
+            waveformPlotter.AddWaveformPlot(leftPlot, "Left Channel", Mixer.AudioChannel.LEFT_CHANNEL);
+            waveformPlotter.AddWaveformPlot(rightPlot, "Right Channel", Mixer.AudioChannel.RIGHT_CHANNEL);
+
+            // Add EQ waveforms
+            waveformPlotter.AddEQWaveformPlot(lowEQplot, "Low Frequencies", Mixer.ISOLATED_LOW);
+            waveformPlotter.AddEQWaveformPlot(midEQplot, "Mid Frequencies", Mixer.ISOLATED_MID);
+            waveformPlotter.AddEQWaveformPlot(highEQplot, "High Frequencies", Mixer.ISOLATED_HIGH);
+
+
+            // FFT plotter
+            fftPlotter = new FFTPlotter(spectrumPlot, AudioProcessor.SAMPLE_RATE);
+            fftPlotter.AddTuner(toneLabel);
+        }
+
+        private void InitializeAudio(ISampleProvider sourceProvider)
+        {
+            // Enabling controls
+            EnablingControls(true);
+
             // Initialize audio processor
-            audioProcessor = new AudioProcessor(new AudioFileReader(wavFile), new WaveFileReader(wavFile));
+            audioProcessor = new AudioProcessor(sourceProvider);
             audioProcessor.AddVuMeter(leftVolumeMeter, rightVolumeMeter);
             audioProcessor.AddPlotters(waveformPlotter, fftPlotter);
             audioProcessor.PlaybackManager.AddTimeElapsedLabel(timeElapsedLabel);
 
-            // Init waveform EQ with SMB
-            waveformPlotter.InitEQ(audioProcessor.PlaybackManager.SMB);
+            // Init waveform EQs
+            waveformPlotter.InitEQs(audioProcessor.PlaybackManager.SMB);
 
             // Perform click on start button
             playButton.PerformClick();
 
             // Start audio processor
             audioProcessor.Start();
+
+            // Handle events
+            AddEventHandlers();
         }
 
+        private void InitializeSynthesizer()
+        {
+            // Istantiate synthesizer
+            synthesizer = new Synthesizer(fncList, synthFuncsCmbx);
+
+            // Make invisible some controls
+            speedSlider.Visible = false;
+            timeSlider.Visible = false;
+            playbackLabel.Visible = false;
+            timeElapsedLabel.Visible = false;
+
+            // Setup functions list
+            fncList.Visible = true;
+            fncList.Location = new Point(438, 24);
+            fncList.Size = new Size(393, 124);
+
+            fncList.SelectedIndexChanged += delegate
+            {
+                if (fncList.SelectedIndex == -1)
+                    return;
+
+
+                synthFuncsCmbx.SelectedIndex = synthFuncsCmbx.FindString(synthesizer.signals[fncList.SelectedIndex].Signal.ToString()); 
+                ampNum.Value = (decimal)synthesizer.signals[fncList.SelectedIndex].Amplitude;
+                freqNum.Value = (decimal)synthesizer.signals[fncList.SelectedIndex].Frequency;
+            };
+
+            addSynth.Visible = true;
+            removeSynth.Visible = true;
+            editSynth.Visible = true;
+
+            synthFuncsCmbx.Visible = true;
+
+            freqNum.Visible = true;
+            ampNum.Visible = true;
+
+            freqNum.MouseWheel += EventsUtils.numericUpDown_MouseWheel;
+            ampNum.MouseWheel += EventsUtils.numericUpDown_MouseWheel;
+
+            synthFuncsCmbx.SelectedIndexChanged += delegate
+            {
+                SignalType selectedSignal = (SignalType)Enum.Parse(typeof(SignalType), synthFuncsCmbx.SelectedItem.ToString());
+
+                synthesizer.EditFunction(fncList.SelectedIndex, funcType: selectedSignal);
+            };
+
+            freqNum.ValueChanged += delegate
+            {
+                synthesizer.EditFunction(fncList.SelectedIndex, freq: (double)freqNum.Value);
+            };
+
+            ampNum.ValueChanged += delegate
+            {
+                synthesizer.EditFunction(fncList.SelectedIndex, amp: (double)ampNum.Value);
+            };
+
+            addSynth.Click += delegate
+            {
+                synthesizer.AddFunction(new SignalFunction() { Signal = SignalType.Sine, Frequency = (double)freqNum.Value, Amplitude = (double)ampNum.Value, Phase = 0.0});
+            };
+
+            editSynth.Click += delegate
+            {
+                synthesizer.EditFunction(fncList.SelectedIndex, new SignalFunction() { Signal = SignalType.Sine, Frequency = (double)freqNum.Value, Amplitude = (double)ampNum.Value, Phase = 0.0 });
+            };
+
+            removeSynth.Click += delegate
+            {
+                synthesizer.RemoveFunction(fncList.SelectedIndex);
+            };
+        }
+
+        
         private void Form1_Load(object sender, EventArgs e)
         {
             EnablingControls(false);
@@ -117,80 +228,26 @@ namespace AudioProcessing
             audioProcessor.Close();
         }
 
-        private void lowPot_ValueChanged(object sender, EventArgs e)
-        {
-            float[] gains = audioProcessor.Mixer.GetGains();
-            float newGain = (float)lowPot.Value * 12.0f;
-            audioProcessor.Mixer.UpdateGains(newGain, gains[1], gains[2]);
-            lowLabel.Text = newGain + " dB";
-        }
-
-        private void midPot_ValueChanged(object sender, EventArgs e)
-        {
-            float[] gains = audioProcessor.Mixer.GetGains();
-            float newGain = (float)midPot.Value * 12.0f;
-            audioProcessor.Mixer.UpdateGains(gains[0], newGain, gains[2]);
-            midLabel.Text = newGain + " dB";
-        }
-
-        private void highPot_ValueChanged(object sender, EventArgs e)
-        {
-            float[] gains = audioProcessor.Mixer.GetGains();
-            float newGain = (float)highPot.Value * 12.0f;
-            audioProcessor.Mixer.UpdateGains(gains[0], gains[1], newGain);
-            highLabel.Text = newGain + " dB";
-        }
-
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        private void wavTSMI_Click(object sender, EventArgs e)
         {
             if (audioOpenFileDialog.ShowDialog() == DialogResult.OK)
             {
-                // Enabling controls
-                EnablingControls(true);
-
                 // Initialize audio
-                InitializeAudio(audioOpenFileDialog.FileName);
-
-                // Handle events
-                AddEventHandlers();
+                InitializeAudio(new AudioFileReader(audioOpenFileDialog.FileName));
 
                 playButton.Enabled = true;
                 stopButton.Enabled = true;
-                openToolStripMenuItem.Enabled = false;
+                wavTSMI.Enabled = false;
             }
         }
 
-        private void profileMicrophoneToolStripMenuItem_Click(object sender, EventArgs e)
+        private void synthTSMI_Click(object sender, EventArgs e)
         {
-            // Enabling controls
-            EnablingControls(true);
+            // Initialize the synthesizer
+            InitializeSynthesizer();
 
-            // Initialize audio processor
-            audioProcessor = new AudioProcessor();
-            audioProcessor.AddVuMeter(leftVolumeMeter, rightVolumeMeter);
-            audioProcessor.AddPlotters(waveformPlotter, fftPlotter);
-            //audioProcessor.PlaybackManager.AddTimeElapsedLabel(timeElapsedLabel);
-
-            // Init waveform EQ with SMB
-            //waveformPlotter.InitEQ(audioProcessor.PlaybackManager.SMB);
-
-            // Perform click on start button
-            //playButton.PerformClick();
-
-            audioProcessor.StartProfiling();
-
-            // Handle events
-            //AddEventHandlers();
-
-            playButton.Enabled = true;
-            stopButton.Enabled = true;
-            openToolStripMenuItem.Enabled = false;
-        }
-
-        private void panPot_ValueChanged(object sender, EventArgs e)
-        {
-            float pan = (float)panPot.Value;
-            audioProcessor.VuMeter.Pan = pan;
+            // Initialize the audio processor (with the synthesizer)
+            InitializeAudio(synthesizer);
         }
 
         private void playButton_Click(object sender, EventArgs e)
@@ -205,11 +262,6 @@ namespace AudioProcessing
         {
             // Stop playback
             audioProcessor.PlaybackManager.StopPlayback();
-        }
-
-        private void isStereoCheckbox_CheckedChanged(object sender, EventArgs e)
-        {
-            audioProcessor.VuMeter.IsStereo = isStereoCheckbox.Checked;
         }
     }
 }

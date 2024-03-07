@@ -37,12 +37,6 @@ namespace AudioProcessing.Audio
         public float Pan { get; set; }
         public bool IsStereo { get; set; }
 
-
-        public void VolumeChanged(object? sender, ValueChangedEventArgs e)
-        {
-            Volume = (float)LogVolumeToLinearVolume((double)e.NewValue);
-        }
-
         public VuMeter(VolumeMeter leftVolume, VolumeMeter rightVolume)
         {
             this.leftVolume = leftVolume;
@@ -109,9 +103,14 @@ namespace AudioProcessing.Audio
             return (float)Math.Log10(Math.Max(Math.Abs(amplitude), Math.Pow(10, minAmplitude / 20))) * 20.0f;
         }
 
+        public static float LogVolumeToLinearVolume(float amplitude)
+        {
+            return (float)(Math.Pow(10, amplitude / 20) - Math.Pow(10, MIN_DECIBEL / 20));
+        }
+
         public static double LogVolumeToLinearVolume(double amplitude)
         {
-            return Math.Pow(10, amplitude / 20) - Math.Pow(10, MIN_DECIBEL / 20);
+            return (double)(Math.Pow(10, amplitude / 20) - Math.Pow(10, MIN_DECIBEL / 20));
         }
     }
 }

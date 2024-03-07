@@ -28,48 +28,48 @@
         /// </summary>
         private void InitializeComponent()
         {
-            waveformPlot = new ScottPlot.WinForms.FormsPlot();
+            stereoPlot = new ScottPlot.WinForms.FormsPlot();
             label1 = new Label();
             label2 = new Label();
             label3 = new Label();
             playbackGroupBox = new GroupBox();
+            synthFuncsCmbx = new ComboBox();
+            editSynth = new Button();
+            removeSynth = new Button();
+            ampNum = new NumericUpDown();
+            freqNum = new NumericUpDown();
+            addSynth = new Button();
+            fncList = new ListBox();
             zoomSlider = new GUI.PrecisionSlider();
             timeSlider = new GUI.PrecisionSlider();
             pitchSlider = new GUI.PrecisionSlider();
             speedSlider = new GUI.PrecisionSlider();
             timeElapsedLabel = new Label();
-            label14 = new Label();
+            playbackLabel = new Label();
             stopButton = new Button();
             playButton = new Button();
-            lowPot = new NAudio.Gui.Pot();
-            midPot = new NAudio.Gui.Pot();
-            highPot = new NAudio.Gui.Pot();
-            lowLabel = new Label();
-            midLabel = new Label();
-            highLabel = new Label();
-            label8 = new Label();
-            label9 = new Label();
-            label10 = new Label();
             eqGroupBox = new GroupBox();
+            highPot = new GUI.PrecisionPot();
+            midPot = new GUI.PrecisionPot();
+            lowPot = new GUI.PrecisionPot();
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
-            openToolStripMenuItem = new ToolStripMenuItem();
-            profileMicrophoneToolStripMenuItem = new ToolStripMenuItem();
+            wavTSMI = new ToolStripMenuItem();
+            synthTSMI = new ToolStripMenuItem();
             audioOpenFileDialog = new OpenFileDialog();
             volumeGroupBox = new GroupBox();
+            panPot = new GUI.PrecisionPot();
             rightVolumeMeter = new GUI.VolumeMeter();
             leftVolumeMeter = new GUI.VolumeMeter();
             isStereoCheckbox = new CheckBox();
-            label13 = new Label();
             label12 = new Label();
             label11 = new Label();
-            panPot = new NAudio.Gui.Pot();
             volumeSlider = new GUI.PrecisionSlider();
             tabControl = new TabControl();
             waveformPage = new TabPage();
             leftRightWaveformPage = new TabPage();
-            leftWaveformPlot = new ScottPlot.WinForms.FormsPlot();
-            rightWaveformPlot = new ScottPlot.WinForms.FormsPlot();
+            leftPlot = new ScottPlot.WinForms.FormsPlot();
+            rightPlot = new ScottPlot.WinForms.FormsPlot();
             eqWaveformPage = new TabPage();
             highEQplot = new ScottPlot.WinForms.FormsPlot();
             midEQplot = new ScottPlot.WinForms.FormsPlot();
@@ -82,6 +82,8 @@
             fftHzSlider = new GUI.PrecisionSlider();
             spectrumPlot = new ScottPlot.WinForms.FormsPlot();
             playbackGroupBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)ampNum).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)freqNum).BeginInit();
             eqGroupBox.SuspendLayout();
             menuStrip1.SuspendLayout();
             volumeGroupBox.SuspendLayout();
@@ -94,14 +96,14 @@
             fftLimitsGroupBox.SuspendLayout();
             SuspendLayout();
             // 
-            // waveformPlot
+            // stereoPlot
             // 
-            waveformPlot.DisplayScale = 1.25F;
-            waveformPlot.Dock = DockStyle.Fill;
-            waveformPlot.Location = new Point(3, 3);
-            waveformPlot.Name = "waveformPlot";
-            waveformPlot.Size = new Size(1074, 451);
-            waveformPlot.TabIndex = 0;
+            stereoPlot.DisplayScale = 1.25F;
+            stereoPlot.Dock = DockStyle.Fill;
+            stereoPlot.Location = new Point(3, 3);
+            stereoPlot.Name = "stereoPlot";
+            stereoPlot.Size = new Size(1074, 451);
+            stereoPlot.TabIndex = 0;
             // 
             // label1
             // 
@@ -132,12 +134,19 @@
             // 
             // playbackGroupBox
             // 
+            playbackGroupBox.Controls.Add(synthFuncsCmbx);
+            playbackGroupBox.Controls.Add(editSynth);
+            playbackGroupBox.Controls.Add(removeSynth);
+            playbackGroupBox.Controls.Add(ampNum);
+            playbackGroupBox.Controls.Add(freqNum);
+            playbackGroupBox.Controls.Add(addSynth);
+            playbackGroupBox.Controls.Add(fncList);
             playbackGroupBox.Controls.Add(zoomSlider);
             playbackGroupBox.Controls.Add(timeSlider);
             playbackGroupBox.Controls.Add(pitchSlider);
             playbackGroupBox.Controls.Add(speedSlider);
             playbackGroupBox.Controls.Add(timeElapsedLabel);
-            playbackGroupBox.Controls.Add(label14);
+            playbackGroupBox.Controls.Add(playbackLabel);
             playbackGroupBox.Controls.Add(stopButton);
             playbackGroupBox.Controls.Add(playButton);
             playbackGroupBox.Location = new Point(12, 529);
@@ -146,6 +155,78 @@
             playbackGroupBox.TabIndex = 13;
             playbackGroupBox.TabStop = false;
             playbackGroupBox.Text = "Playback:";
+            // 
+            // synthFuncsCmbx
+            // 
+            synthFuncsCmbx.DropDownStyle = ComboBoxStyle.DropDownList;
+            synthFuncsCmbx.FormattingEnabled = true;
+            synthFuncsCmbx.Location = new Point(847, 61);
+            synthFuncsCmbx.Name = "synthFuncsCmbx";
+            synthFuncsCmbx.Size = new Size(113, 28);
+            synthFuncsCmbx.TabIndex = 32;
+            synthFuncsCmbx.Visible = false;
+            // 
+            // editSynth
+            // 
+            editSynth.Location = new Point(920, 127);
+            editSynth.Name = "editSynth";
+            editSynth.Size = new Size(67, 29);
+            editSynth.TabIndex = 31;
+            editSynth.Text = "Edit";
+            editSynth.UseVisualStyleBackColor = true;
+            editSynth.Visible = false;
+            // 
+            // removeSynth
+            // 
+            removeSynth.Location = new Point(993, 127);
+            removeSynth.Name = "removeSynth";
+            removeSynth.Size = new Size(76, 29);
+            removeSynth.TabIndex = 30;
+            removeSynth.Text = "Remove";
+            removeSynth.UseVisualStyleBackColor = true;
+            removeSynth.Visible = false;
+            // 
+            // ampNum
+            // 
+            ampNum.DecimalPlaces = 3;
+            ampNum.Increment = new decimal(new int[] { 1, 0, 0, 196608 });
+            ampNum.Location = new Point(961, 95);
+            ampNum.Maximum = new decimal(new int[] { 1, 0, 0, 0 });
+            ampNum.Name = "ampNum";
+            ampNum.Size = new Size(73, 27);
+            ampNum.TabIndex = 29;
+            ampNum.Value = new decimal(new int[] { 5, 0, 0, 65536 });
+            ampNum.Visible = false;
+            // 
+            // freqNum
+            // 
+            freqNum.Location = new Point(847, 95);
+            freqNum.Maximum = new decimal(new int[] { 20000, 0, 0, 0 });
+            freqNum.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            freqNum.Name = "freqNum";
+            freqNum.Size = new Size(108, 27);
+            freqNum.TabIndex = 28;
+            freqNum.Value = new decimal(new int[] { 440, 0, 0, 0 });
+            freqNum.Visible = false;
+            // 
+            // addSynth
+            // 
+            addSynth.Location = new Point(847, 127);
+            addSynth.Name = "addSynth";
+            addSynth.Size = new Size(67, 29);
+            addSynth.TabIndex = 1;
+            addSynth.Text = "Add";
+            addSynth.UseVisualStyleBackColor = true;
+            addSynth.Visible = false;
+            // 
+            // fncList
+            // 
+            fncList.FormattingEnabled = true;
+            fncList.Location = new Point(438, 124);
+            fncList.Name = "fncList";
+            fncList.Size = new Size(393, 24);
+            fncList.TabIndex = 1;
+            fncList.Visible = false;
             // 
             // zoomSlider
             // 
@@ -166,7 +247,7 @@
             // 
             timeSlider.Location = new Point(438, 86);
             timeSlider.Maximum = 2F;
-            timeSlider.Minimum = 0.5F;
+            timeSlider.Minimum = 0.25F;
             timeSlider.Name = "timeSlider";
             timeSlider.PrecisionScale = GUI.PrecisionScale.Linear;
             timeSlider.Size = new Size(393, 70);
@@ -179,28 +260,29 @@
             // pitchSlider
             // 
             pitchSlider.Location = new Point(23, 86);
-            pitchSlider.Maximum = 200F;
-            pitchSlider.Minimum = 10F;
+            pitchSlider.Maximum = 4F;
+            pitchSlider.Minimum = 0.25F;
             pitchSlider.Name = "pitchSlider";
             pitchSlider.PrecisionScale = GUI.PrecisionScale.Linear;
             pitchSlider.Size = new Size(394, 70);
             pitchSlider.TabIndex = 25;
             pitchSlider.Text = "Pitch:";
-            pitchSlider.TickFrequency = 500;
-            pitchSlider.Value = 100F;
-            pitchSlider.ValueSuffix = "%";
+            pitchSlider.TickFrequency = 25;
+            pitchSlider.Value = 1F;
+            pitchSlider.ValueSuffix = " x";
             // 
             // speedSlider
             // 
             speedSlider.Location = new Point(438, 24);
-            speedSlider.Maximum = 2F;
-            speedSlider.Minimum = 0.25F;
+            speedSlider.Maximum = 3F;
+            speedSlider.Minimum = 0.001F;
             speedSlider.Name = "speedSlider";
+            speedSlider.Precision = 0.001F;
             speedSlider.PrecisionScale = GUI.PrecisionScale.Linear;
             speedSlider.Size = new Size(393, 70);
             speedSlider.TabIndex = 1;
             speedSlider.Text = "Speed:";
-            speedSlider.TickFrequency = 10;
+            speedSlider.TickFrequency = 100;
             speedSlider.Value = 1F;
             speedSlider.ValueSuffix = "x";
             // 
@@ -213,19 +295,19 @@
             timeElapsedLabel.TabIndex = 24;
             timeElapsedLabel.Text = "Samples: 0\r\nTime: 00:00,000";
             // 
-            // label14
+            // playbackLabel
             // 
-            label14.AutoSize = true;
-            label14.Location = new Point(847, 43);
-            label14.Name = "label14";
-            label14.Size = new Size(106, 20);
-            label14.TabIndex = 23;
-            label14.Text = "Playback state:";
+            playbackLabel.AutoSize = true;
+            playbackLabel.Location = new Point(854, 35);
+            playbackLabel.Name = "playbackLabel";
+            playbackLabel.Size = new Size(106, 20);
+            playbackLabel.TabIndex = 23;
+            playbackLabel.Text = "Playback state:";
             // 
             // stopButton
             // 
             stopButton.Font = new Font("Consolas", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            stopButton.Location = new Point(1017, 26);
+            stopButton.Location = new Point(1017, 19);
             stopButton.Name = "stopButton";
             stopButton.Size = new Size(48, 48);
             stopButton.TabIndex = 22;
@@ -236,7 +318,7 @@
             // playButton
             // 
             playButton.Font = new Font("Consolas", 16.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            playButton.Location = new Point(961, 26);
+            playButton.Location = new Point(965, 19);
             playButton.Name = "playButton";
             playButton.Size = new Size(48, 48);
             playButton.TabIndex = 21;
@@ -244,113 +326,59 @@
             playButton.UseVisualStyleBackColor = true;
             playButton.Click += playButton_Click;
             // 
-            // lowPot
-            // 
-            lowPot.Location = new Point(54, 40);
-            lowPot.Margin = new Padding(4, 5, 4, 5);
-            lowPot.Maximum = 1D;
-            lowPot.Minimum = -1D;
-            lowPot.Name = "lowPot";
-            lowPot.Size = new Size(54, 61);
-            lowPot.TabIndex = 14;
-            lowPot.Value = 0D;
-            lowPot.ValueChanged += lowPot_ValueChanged;
-            // 
-            // midPot
-            // 
-            midPot.Location = new Point(121, 40);
-            midPot.Margin = new Padding(4, 5, 4, 5);
-            midPot.Maximum = 1D;
-            midPot.Minimum = -1D;
-            midPot.Name = "midPot";
-            midPot.Size = new Size(54, 61);
-            midPot.TabIndex = 15;
-            midPot.Value = 0D;
-            midPot.ValueChanged += midPot_ValueChanged;
-            // 
-            // highPot
-            // 
-            highPot.Location = new Point(191, 40);
-            highPot.Margin = new Padding(4, 5, 4, 5);
-            highPot.Maximum = 1D;
-            highPot.Minimum = -1D;
-            highPot.Name = "highPot";
-            highPot.Size = new Size(54, 61);
-            highPot.TabIndex = 16;
-            highPot.Value = 0D;
-            highPot.ValueChanged += highPot_ValueChanged;
-            // 
-            // lowLabel
-            // 
-            lowLabel.Location = new Point(50, 98);
-            lowLabel.Name = "lowLabel";
-            lowLabel.Size = new Size(62, 25);
-            lowLabel.TabIndex = 17;
-            lowLabel.Text = "0 dB";
-            lowLabel.TextAlign = ContentAlignment.TopCenter;
-            // 
-            // midLabel
-            // 
-            midLabel.Location = new Point(118, 98);
-            midLabel.Name = "midLabel";
-            midLabel.Size = new Size(62, 25);
-            midLabel.TabIndex = 18;
-            midLabel.Text = "0 dB";
-            midLabel.TextAlign = ContentAlignment.TopCenter;
-            // 
-            // highLabel
-            // 
-            highLabel.Location = new Point(188, 97);
-            highLabel.Name = "highLabel";
-            highLabel.Size = new Size(62, 25);
-            highLabel.TabIndex = 19;
-            highLabel.Text = "0 dB";
-            highLabel.TextAlign = ContentAlignment.TopCenter;
-            // 
-            // label8
-            // 
-            label8.AutoSize = true;
-            label8.Location = new Point(63, 19);
-            label8.Name = "label8";
-            label8.Size = new Size(36, 20);
-            label8.TabIndex = 20;
-            label8.Text = "Low";
-            // 
-            // label9
-            // 
-            label9.AutoSize = true;
-            label9.Location = new Point(130, 19);
-            label9.Name = "label9";
-            label9.Size = new Size(35, 20);
-            label9.TabIndex = 21;
-            label9.Text = "Mid";
-            // 
-            // label10
-            // 
-            label10.AutoSize = true;
-            label10.Location = new Point(198, 19);
-            label10.Name = "label10";
-            label10.Size = new Size(41, 20);
-            label10.TabIndex = 22;
-            label10.Text = "High";
-            // 
             // eqGroupBox
             // 
-            eqGroupBox.Controls.Add(midPot);
-            eqGroupBox.Controls.Add(label10);
-            eqGroupBox.Controls.Add(lowPot);
-            eqGroupBox.Controls.Add(label9);
             eqGroupBox.Controls.Add(highPot);
-            eqGroupBox.Controls.Add(label8);
-            eqGroupBox.Controls.Add(lowLabel);
-            eqGroupBox.Controls.Add(highLabel);
-            eqGroupBox.Controls.Add(midLabel);
+            eqGroupBox.Controls.Add(midPot);
+            eqGroupBox.Controls.Add(lowPot);
             eqGroupBox.Location = new Point(1099, 550);
             eqGroupBox.Name = "eqGroupBox";
             eqGroupBox.Size = new Size(300, 141);
             eqGroupBox.TabIndex = 23;
             eqGroupBox.TabStop = false;
             eqGroupBox.Text = "EQ:";
+            // 
+            // highPot
+            // 
+            highPot.Location = new Point(181, 19);
+            highPot.Maximum = 18D;
+            highPot.Minimum = -18D;
+            highPot.Name = "highPot";
+            highPot.PotIndex = 2;
+            highPot.ShowValue = true;
+            highPot.Size = new Size(73, 104);
+            highPot.TabIndex = 25;
+            highPot.Text = "High";
+            highPot.Value = 0D;
+            highPot.ValueSuffix = " dB";
+            // 
+            // midPot
+            // 
+            midPot.Location = new Point(111, 19);
+            midPot.Maximum = 18D;
+            midPot.Minimum = -18D;
+            midPot.Name = "midPot";
+            midPot.PotIndex = 1;
+            midPot.ShowValue = true;
+            midPot.Size = new Size(73, 104);
+            midPot.TabIndex = 24;
+            midPot.Text = "Mid";
+            midPot.Value = 0D;
+            midPot.ValueSuffix = " dB";
+            // 
+            // lowPot
+            // 
+            lowPot.Location = new Point(41, 19);
+            lowPot.Maximum = 18D;
+            lowPot.Minimum = -18D;
+            lowPot.Name = "lowPot";
+            lowPot.PotIndex = 0;
+            lowPot.ShowValue = true;
+            lowPot.Size = new Size(73, 104);
+            lowPot.TabIndex = 23;
+            lowPot.Text = "Low";
+            lowPot.Value = 0D;
+            lowPot.ValueSuffix = " dB";
             // 
             // menuStrip1
             // 
@@ -364,26 +392,26 @@
             // 
             // fileToolStripMenuItem
             // 
-            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { openToolStripMenuItem, profileMicrophoneToolStripMenuItem });
+            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { wavTSMI, synthTSMI });
             fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             fileToolStripMenuItem.Size = new Size(56, 24);
             fileToolStripMenuItem.Text = "Tasks";
             // 
-            // openToolStripMenuItem
+            // wavTSMI
             // 
-            openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
-            openToolStripMenuItem.Size = new Size(274, 26);
-            openToolStripMenuItem.Text = "Import WAV";
-            openToolStripMenuItem.Click += openToolStripMenuItem_Click;
+            wavTSMI.Name = "wavTSMI";
+            wavTSMI.ShortcutKeys = Keys.Control | Keys.O;
+            wavTSMI.Size = new Size(251, 26);
+            wavTSMI.Text = "Import WAV";
+            wavTSMI.Click += wavTSMI_Click;
             // 
-            // profileMicrophoneToolStripMenuItem
+            // synthTSMI
             // 
-            profileMicrophoneToolStripMenuItem.Name = "profileMicrophoneToolStripMenuItem";
-            profileMicrophoneToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.M;
-            profileMicrophoneToolStripMenuItem.Size = new Size(274, 26);
-            profileMicrophoneToolStripMenuItem.Text = "Profile microphone";
-            profileMicrophoneToolStripMenuItem.Click += profileMicrophoneToolStripMenuItem_Click;
+            synthTSMI.Name = "synthTSMI";
+            synthTSMI.ShortcutKeys = Keys.Control | Keys.S;
+            synthTSMI.Size = new Size(251, 26);
+            synthTSMI.Text = "Start Synthesizer";
+            synthTSMI.Click += synthTSMI_Click;
             // 
             // audioOpenFileDialog
             // 
@@ -391,13 +419,12 @@
             // 
             // volumeGroupBox
             // 
+            volumeGroupBox.Controls.Add(panPot);
             volumeGroupBox.Controls.Add(rightVolumeMeter);
             volumeGroupBox.Controls.Add(leftVolumeMeter);
             volumeGroupBox.Controls.Add(isStereoCheckbox);
-            volumeGroupBox.Controls.Add(label13);
             volumeGroupBox.Controls.Add(label12);
             volumeGroupBox.Controls.Add(label11);
-            volumeGroupBox.Controls.Add(panPot);
             volumeGroupBox.Controls.Add(label1);
             volumeGroupBox.Controls.Add(label3);
             volumeGroupBox.Controls.Add(label2);
@@ -408,6 +435,20 @@
             volumeGroupBox.TabIndex = 25;
             volumeGroupBox.TabStop = false;
             volumeGroupBox.Text = "Volume:";
+            // 
+            // panPot
+            // 
+            panPot.Location = new Point(221, 412);
+            panPot.Maximum = 1D;
+            panPot.Minimum = -1D;
+            panPot.Name = "panPot";
+            panPot.PotIndex = -1;
+            panPot.ShowValue = false;
+            panPot.Size = new Size(62, 76);
+            panPot.TabIndex = 29;
+            panPot.Text = "Pan";
+            panPot.Value = 0D;
+            panPot.ValueSuffix = null;
             // 
             // rightVolumeMeter
             // 
@@ -442,16 +483,6 @@
             isStereoCheckbox.TabIndex = 13;
             isStereoCheckbox.Text = "stereo";
             isStereoCheckbox.UseVisualStyleBackColor = true;
-            isStereoCheckbox.CheckedChanged += isStereoCheckbox_CheckedChanged;
-            // 
-            // label13
-            // 
-            label13.AutoSize = true;
-            label13.Location = new Point(238, 416);
-            label13.Name = "label13";
-            label13.Size = new Size(32, 20);
-            label13.TabIndex = 12;
-            label13.Text = "Pan";
             // 
             // label12
             // 
@@ -470,18 +501,6 @@
             label11.Size = new Size(16, 20);
             label11.TabIndex = 10;
             label11.Text = "L";
-            // 
-            // panPot
-            // 
-            panPot.Location = new Point(226, 435);
-            panPot.Margin = new Padding(4, 5, 4, 5);
-            panPot.Maximum = 1D;
-            panPot.Minimum = -1D;
-            panPot.Name = "panPot";
-            panPot.Size = new Size(54, 61);
-            panPot.TabIndex = 9;
-            panPot.Value = 0D;
-            panPot.ValueChanged += panPot_ValueChanged;
             // 
             // volumeSlider
             // 
@@ -513,7 +532,7 @@
             // 
             // waveformPage
             // 
-            waveformPage.Controls.Add(waveformPlot);
+            waveformPage.Controls.Add(stereoPlot);
             waveformPage.Location = new Point(4, 29);
             waveformPage.Name = "waveformPage";
             waveformPage.Padding = new Padding(3);
@@ -524,8 +543,8 @@
             // 
             // leftRightWaveformPage
             // 
-            leftRightWaveformPage.Controls.Add(leftWaveformPlot);
-            leftRightWaveformPage.Controls.Add(rightWaveformPlot);
+            leftRightWaveformPage.Controls.Add(leftPlot);
+            leftRightWaveformPage.Controls.Add(rightPlot);
             leftRightWaveformPage.Location = new Point(4, 29);
             leftRightWaveformPage.Name = "leftRightWaveformPage";
             leftRightWaveformPage.Size = new Size(1080, 457);
@@ -533,21 +552,21 @@
             leftRightWaveformPage.Text = "L / R Waveform";
             leftRightWaveformPage.UseVisualStyleBackColor = true;
             // 
-            // leftWaveformPlot
+            // leftPlot
             // 
-            leftWaveformPlot.DisplayScale = 1.25F;
-            leftWaveformPlot.Location = new Point(3, 3);
-            leftWaveformPlot.Name = "leftWaveformPlot";
-            leftWaveformPlot.Size = new Size(1078, 226);
-            leftWaveformPlot.TabIndex = 1;
+            leftPlot.DisplayScale = 1.25F;
+            leftPlot.Location = new Point(3, 3);
+            leftPlot.Name = "leftPlot";
+            leftPlot.Size = new Size(1078, 226);
+            leftPlot.TabIndex = 1;
             // 
-            // rightWaveformPlot
+            // rightPlot
             // 
-            rightWaveformPlot.DisplayScale = 1.25F;
-            rightWaveformPlot.Location = new Point(3, 228);
-            rightWaveformPlot.Name = "rightWaveformPlot";
-            rightWaveformPlot.Size = new Size(1078, 226);
-            rightWaveformPlot.TabIndex = 0;
+            rightPlot.DisplayScale = 1.25F;
+            rightPlot.Location = new Point(3, 228);
+            rightPlot.Name = "rightPlot";
+            rightPlot.Size = new Size(1078, 226);
+            rightPlot.TabIndex = 0;
             // 
             // eqWaveformPage
             // 
@@ -634,28 +653,29 @@
             // 
             // fftDbSlider
             // 
-            fftDbSlider.Location = new Point(74, 26);
+            fftDbSlider.Location = new Point(68, 26);
             fftDbSlider.Maximum = 3F;
             fftDbSlider.Minimum = -37.5F;
             fftDbSlider.Name = "fftDbSlider";
             fftDbSlider.Orientation = Orientation.Vertical;
+            fftDbSlider.Precision = 0.1F;
             fftDbSlider.PrecisionScale = GUI.PrecisionScale.Exponential;
-            fftDbSlider.Size = new Size(53, 267);
+            fftDbSlider.Size = new Size(62, 267);
             fftDbSlider.TabIndex = 6;
             fftDbSlider.Text = "precisionSlider2";
-            fftDbSlider.TickFrequency = 1;
+            fftDbSlider.TickFrequency = 15;
             fftDbSlider.Value = 3F;
             fftDbSlider.ValueSuffix = "dB";
             // 
             // fftHzSlider
             // 
-            fftHzSlider.Location = new Point(6, 26);
+            fftHzSlider.Location = new Point(1, 26);
             fftHzSlider.Maximum = 16F;
             fftHzSlider.Minimum = 10F;
             fftHzSlider.Name = "fftHzSlider";
             fftHzSlider.Orientation = Orientation.Vertical;
             fftHzSlider.PrecisionScale = GUI.PrecisionScale.Linear;
-            fftHzSlider.Size = new Size(86, 267);
+            fftHzSlider.Size = new Size(71, 267);
             fftHzSlider.TabIndex = 5;
             fftHzSlider.Text = "precisionSlider1";
             fftHzSlider.TickFrequency = 10;
@@ -689,8 +709,9 @@
             Load += Form1_Load;
             playbackGroupBox.ResumeLayout(false);
             playbackGroupBox.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)ampNum).EndInit();
+            ((System.ComponentModel.ISupportInitialize)freqNum).EndInit();
             eqGroupBox.ResumeLayout(false);
-            eqGroupBox.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             volumeGroupBox.ResumeLayout(false);
@@ -708,43 +729,32 @@
 
         #endregion
 
-        private ScottPlot.WinForms.FormsPlot waveformPlot;
+        private ScottPlot.WinForms.FormsPlot stereoPlot;
         private Label label1;
         private Label label2;
         private Label label3;
         private GroupBox playbackGroupBox;
-        private NAudio.Gui.Pot lowPot;
-        private NAudio.Gui.Pot midPot;
-        private NAudio.Gui.Pot highPot;
-        private Label lowLabel;
-        private Label midLabel;
-        private Label highLabel;
-        private Label label8;
-        private Label label9;
-        private Label label10;
         private GroupBox eqGroupBox;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem fileToolStripMenuItem;
-        private ToolStripMenuItem openToolStripMenuItem;
+        private ToolStripMenuItem wavTSMI;
         private OpenFileDialog audioOpenFileDialog;
         private GroupBox volumeGroupBox;
-        private NAudio.Gui.Pot panPot;
         private Label label11;
         private Label label13;
         private Label label12;
         private TabControl tabControl;
         private TabPage waveformPage;
         private TabPage spectrogramPage;
-        private ToolStripMenuItem profileMicrophoneToolStripMenuItem;
         private Button playButton;
         private Button stopButton;
-        private Label label14;
+        private Label playbackLabel;
         private CheckBox isStereoCheckbox;
         private GUI.VolumeMeter leftVolumeMeter;
         private GUI.VolumeMeter rightVolumeMeter;
         private TabPage leftRightWaveformPage;
-        private ScottPlot.WinForms.FormsPlot leftWaveformPlot;
-        private ScottPlot.WinForms.FormsPlot rightWaveformPlot;
+        private ScottPlot.WinForms.FormsPlot leftPlot;
+        private ScottPlot.WinForms.FormsPlot rightPlot;
         private ScottPlot.WinForms.FormsPlot spectrumPlot;
         private GroupBox fftLimitsGroupBox;
         private TabPage eqWaveformPage;
@@ -761,5 +771,17 @@
         private GUI.PrecisionSlider volumeSlider;
         private GUI.PrecisionSlider fftHzSlider;
         private GUI.PrecisionSlider fftDbSlider;
+        private ToolStripMenuItem synthTSMI;
+        private ListBox fncList;
+        private GUI.PrecisionPot panPot;
+        private GUI.PrecisionPot lowPot;
+        private GUI.PrecisionPot midPot;
+        private GUI.PrecisionPot highPot;
+        private Button addSynth;
+        private NumericUpDown freqNum;
+        private NumericUpDown ampNum;
+        private Button removeSynth;
+        private Button editSynth;
+        private ComboBox synthFuncsCmbx;
     }
 }

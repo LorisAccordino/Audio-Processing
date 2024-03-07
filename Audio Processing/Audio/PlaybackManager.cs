@@ -1,5 +1,6 @@
 ﻿using AudioProcessing.Events;
 using AudioProcessing.Plotting;
+using Microsoft.VisualBasic;
 using NAudio.Wave;
 
 namespace AudioProcessing.Audio
@@ -20,7 +21,8 @@ namespace AudioProcessing.Audio
 
         private Label timeElapsedLabel;
 
-        public IWaveProvider SourceStream { get; private set; }
+        //public ISampleProvider SourceStream { get; private set; }
+        public WaveFormat WaveFormat { get; private set; }
         public SMBPitchShiftingSampleProvider SMB { get; private set; }
 
         // Parameters
@@ -40,29 +42,31 @@ namespace AudioProcessing.Audio
             }
             set
             {
-                SMB.PitchFactor = value;
+                if (SMB != null)
+                {
+                    SMB.PitchFactor = value;
+                }
             }
         }
         public float PlaybackSpeed { get; set; }
+
+        public float TimeStrech
+        {
+            get
+            {
+                return PlaybackSpeed * PitchFactor == 1 ? PlaybackSpeed : 0;
+            }
+            set
+            {
+                PlaybackSpeed = value;
+                PitchFactor = 1 / value;
+            }
+        }
+
         public long CurrentSample { get; private set; }
 
 
         // Events
-        public void SpeedChanged(object? sender, ValueChangedEventArgs e)
-        {
-            PlaybackSpeed = e.NewValue;
-        }
-
-        public void PitchChanged(object? sender, ValueChangedEventArgs e)
-        {
-            PitchFactor = e.NewValue / 100;
-        }
-
-        public void TimeChanged(object? sender, ValueChangedEventArgs e)
-        {
-            PlaybackSpeed = e.NewValue;
-            SMB.PitchFactor = 1 / e.NewValue;
-        }
 
         public void OnPlaybackStarted(EventArgs e)
         {
@@ -75,14 +79,32 @@ namespace AudioProcessing.Audio
         }
 
 
-        public PlaybackManager(ISampleProvider sourceProvider, IWaveProvider sourceStream)
+        public PlaybackManager(ISampleProvider sourceProvider, WaveFormat waveFormat)
         {
             // Initialize streams
-            SourceStream = sourceStream;
+            WaveFormat = waveFormat;
             SMB = new SMBPitchShiftingSampleProvider(sourceProvider, FFT_SIZE, OSAMP, 1.0f);
 
             // Initialize buffer and wave output
-            bufferedWaveProvider = new BufferedWaveProvider(sourceStream.WaveFormat);
+            bufferedWaveProvider = new BufferedWaveProvider(WaveFormat);
+            bufferedWaveProvider.BufferDuration = TimeSpan.FromSeconds(5);
+            waveOut.Init(bufferedWaveProvider);
+
+            // Add handler for PlaybackStopped event
+            waveOut.PlaybackStopped += (sender, e) =>
+            {
+                OnPlaybackStopped(EventArgs.Empty);
+            };
+
+            // Reset values to default
+            PlaybackSpeed = 1.0f;
+            PitchFactor = 1.0f;
+        }
+
+        public PlaybackManager(WaveFormat waveFormat)
+        {
+            // Initialize buffer and wave output
+            bufferedWaveProvider = new BufferedWaveProvider(waveFormat);
             bufferedWaveProvider.BufferDuration = TimeSpan.FromSeconds(5);
             waveOut.Init(bufferedWaveProvider);
 
@@ -142,7 +164,7 @@ namespace AudioProcessing.Audio
 
         public bool IsBufferOverfull(int samples = 44100)
         {
-            return bufferedWaveProvider.BufferedBytes > samples;
+            return bufferedWaveProvider.BufferedBytes > samples * PlaybackSpeed;
         }
 
         public byte[] AdjustSpeed(byte[] data)
@@ -155,11 +177,11 @@ namespace AudioProcessing.Audio
                 if (Math.Abs(PlaybackSpeed - 1) > double.Epsilon)
                 {
                     // Resample audio if playback speed changed
-                    var newRate = Convert.ToInt32(SourceStream.WaveFormat.SampleRate / PlaybackSpeed);
-                    var wf = new WaveFormat(newRate, 16, SourceStream.WaveFormat.Channels);
+                    var newRate = Convert.ToInt32(WaveFormat.SampleRate / PlaybackSpeed);
+                    var wf = new WaveFormat(newRate, 16, WaveFormat.Channels);
                     var resampleInputMemoryStream = new MemoryStream(data) { Position = 0 };
 
-                    WaveStream ws = new RawSourceWaveStream(resampleInputMemoryStream, SourceStream.WaveFormat);
+                    WaveStream ws = new RawSourceWaveStream(resampleInputMemoryStream, WaveFormat);
                     var wfcs = new WaveFormatConversionStream(wf, ws) { Position = 0 };
                     var b = new byte[ws.WaveFormat.AverageBytesPerSecond];
 

@@ -1,7 +1,7 @@
-﻿using AudioProcessing.Audio;
+﻿using AudioProcessing.Plotting.Waveform;
 using AudioProcessing.Audio.DSP;
 using AudioProcessing.Events;
-using ScottPlot.Plottables;
+using NAudio.Wave;
 using ScottPlot.WinForms;
 
 namespace AudioProcessing.Plotting
@@ -9,19 +9,13 @@ namespace AudioProcessing.Plotting
     public class WaveformPlotter
     {
         // Plots
-        private WaveformPlot stereoWavePlot;
-        private WaveformPlot leftChannelPlot;
-        private WaveformPlot rightChannelPlot;
+        /*private List<WaveformPlot> waveformPlots = new List<WaveformPlot>();
+        private List<EQWaveformPlot> EQplots = new List<EQWaveformPlot>();*/
 
-        private WaveformPlot lowEQplot;
-        private WaveformPlot midEQplot;
-        private WaveformPlot highEQplot;
+        private List<IWaveformPlot> plots = new List<IWaveformPlot>();
 
-        // EQs
-        private Equalizer lowEQ;
-        private Equalizer midEQ;
-        private Equalizer highEQ;
 
+        public event EventHandler<ValueChangedEventArgs> ZoomChanged;
         private int waveformZoom;
         public int Zoom
         {
@@ -32,131 +26,83 @@ namespace AudioProcessing.Plotting
             set
             {
                 waveformZoom = value;
-                stereoWavePlot.Zoom = value;
-                leftChannelPlot.Zoom = value;
-                rightChannelPlot.Zoom = value;
-                lowEQplot.Zoom = value;
-                midEQplot.Zoom = value;
-                highEQplot.Zoom = value;
+                OnZoomChanged(new ValueChangedEventArgs(value));
             }
         }
 
-        public WaveformPlotter(FormsPlot stereoPlot, FormsPlot leftPlot, FormsPlot rightPlot)
+        public WaveformPlotter()
         {
-            // Plots
-            stereoWavePlot = new WaveformPlot(stereoPlot, "Waveform (Stereo)");
-            leftChannelPlot = new WaveformPlot(leftPlot, "Left Channel");
-            rightChannelPlot = new WaveformPlot(rightPlot, "Right Channel");
+
         }
 
-        public void InitEQ(SMBPitchShiftingSampleProvider SMB)
+        public void AddWaveformPlot(FormsPlot plot, string title, Mixer.AudioChannel channel)
         {
-            lowEQ = new Equalizer(SMB, Mixer.ISOLATED_LOW);
-            lowEQ.Update();
-
-            midEQ = new Equalizer(SMB, Mixer.ISOLATED_MID);
-            midEQ.Update();
-
-            highEQ = new Equalizer(SMB, Mixer.ISOLATED_HIGH);
-            highEQ.Update();
+            AddPlot(new WaveformPlot(plot, title, channel));
         }
 
-        //public void InitEQplots(SMBPitchShiftingSampleProvider SMB, FormsPlot lowPlot, FormsPlot midPlot, FormsPlot highPlot)
-        public void AddEQplots(FormsPlot lowPlot, FormsPlot midPlot, FormsPlot highPlot)
+        public void AddEQWaveformPlot(FormsPlot plot, string title, EqualizerBand[] bands)
         {
-            // Plots
-            lowEQplot = new WaveformPlot(lowPlot, "Low Frequencies");
-            midEQplot = new WaveformPlot(midPlot, "Mid Frequencies");
-            highEQplot = new WaveformPlot(highPlot, "High Frequencies");
+            AddEQWaveformPlot(plot, title, bands, Mixer.AudioChannel.STEREO);
+        }
 
-            // Init EQs
-            /*lowEQ = new Equalizer(SMB, Mixer.ISOLATED_LOW);
-            midEQ = new Equalizer(SMB, Mixer.ISOLATED_MID);
-            highEQ = new Equalizer(SMB, Mixer.ISOLATED_HIGH);*/
+        public void AddEQWaveformPlot(FormsPlot plot, string title, EqualizerBand[] bands, Mixer.AudioChannel channel)
+        {
+           AddPlot(new EQWaveformPlot(plot, title, bands, channel));     
+        }
+
+        private void AddPlot(IWaveformPlot plot)
+        {
+            ZoomChanged += plot.OnZoomChanged;
+            plots.Add(plot);
+        }
+
+        public void InitEQs(ISampleProvider sourceProvider)
+        {
+            foreach (IWaveformPlot plot in plots)
+            {
+                if (plot is EQWaveformPlot EQplot)
+                {
+                    EQplot.InitEQ(sourceProvider);
+                }
+            }
         }
 
         public void UpdateCurrentPlotTab(object? sender, EventArgs e)
         {
-            TabControl tabControl = (TabControl)sender;
-            TabPage currentPage = tabControl.SelectedTab;
-            WaveformPlot[] waveformPlots = GetWaveformPlotsAsArray();
-
-            foreach (WaveformPlot waveformPlot in waveformPlots)
+            if (sender is TabControl tabControl)
             {
-                if (waveformPlot.ParentControl == currentPage)
+                TabPage? currentPage = tabControl.SelectedTab;
+                foreach (WaveformPlot plot in plots)
                 {
-                    waveformPlot.RefreshRequested = true;
-                }
-                else
-                {
-                    waveformPlot.RefreshRequested = false;
+                    if (plot.ParentControl == currentPage)
+                    {
+                        plot.RefreshRequested = true;
+                    }
+                    else
+                    {
+                        plot.RefreshRequested = false;
+                    }
                 }
             }
         }
 
         public void UpdateWaveformPlots(float[] floatBuffer)
         {
-            for (int i = 0; i < floatBuffer.Length; i++)
+            foreach (IWaveformPlot plot in plots)
             {
-                if (i % 2 == 0)
+                if (plot is EQWaveformPlot EQplot)
                 {
-                    // Add every point to stereo plot
-                    stereoWavePlot.AddPoint((floatBuffer[i] + floatBuffer[i + 1]) / 2);
+                    EQplot.Update(floatBuffer);
                 }
-
-                // Add even values to left channel
-                if (i % 2 == 0)
+                else
                 {
-                    leftChannelPlot.AddPoint(floatBuffer[i]);
-                }
-
-                // Add odd values to left channel
-                if (i % 2 != 0)
-                {
-                    rightChannelPlot.AddPoint(floatBuffer[i]);
+                    plot.Update(floatBuffer);
                 }
             }
-
-            // Refresh plots
-            stereoWavePlot.RefreshPlot();
-            leftChannelPlot.RefreshPlot();
-            rightChannelPlot.RefreshPlot();
-        }
-
-        public void UpdateEQplots(float[] floatBuffer)
-        {
-            float[] lowEQbuffer = new float[floatBuffer.Length];
-            float[] midEQbuffer = new float[floatBuffer.Length];
-            float[] highEQbuffer = new float[floatBuffer.Length];
-
-            Array.Copy(floatBuffer, lowEQbuffer, floatBuffer.Length);
-            Array.Copy(floatBuffer, midEQbuffer, floatBuffer.Length);
-            Array.Copy(floatBuffer, highEQbuffer, floatBuffer.Length);
-
-            lowEQ.ApplyToBuffer(lowEQbuffer);
-            midEQ.ApplyToBuffer(midEQbuffer);
-            highEQ.ApplyToBuffer(highEQbuffer);
-
-            for (int i = 0; i < floatBuffer.Length; i++)
-            {
-                if (i % 2 == 0)
-                {
-                    lowEQplot.AddPoint((lowEQbuffer[i] + lowEQbuffer[i + 1]) / 2);
-                    midEQplot.AddPoint((midEQbuffer[i] + midEQbuffer[i + 1]) / 2);
-                    highEQplot.AddPoint((highEQbuffer[i] + highEQbuffer[i + 1]) / 2);
-                }
-            }
-
-            // Refresh plots
-            lowEQplot.RefreshPlot();
-            midEQplot.RefreshPlot();
-            highEQplot.RefreshPlot();
         }
 
         public void ClearAll()
         {
-            WaveformPlot[] plots = GetWaveformPlotsAsArray();
-
             foreach(WaveformPlot plot in plots)
             {
                 plot.WavePlot.Clear();
@@ -164,14 +110,9 @@ namespace AudioProcessing.Plotting
             }
         }
 
-        private WaveformPlot[] GetWaveformPlotsAsArray()
+        protected virtual void OnZoomChanged(ValueChangedEventArgs e)
         {
-            return [stereoWavePlot, leftChannelPlot, rightChannelPlot, lowEQplot, midEQplot, highEQplot];
-        }
-
-        public void ZoomChanged(object? sender, ValueChangedEventArgs e)
-        {
-            Zoom = (int)Math.Max(1.0f, e.NewValue);
+            ZoomChanged?.Invoke(this, e);
         }
     }
 }
