@@ -16,8 +16,7 @@ La frequenza è la grandezza fisica che esprime il numero di cicli o oscillazion
 
 Dove:
 
-<!-- - $f$ rappresenta la frequenza, -->
-- ![equation](https://latex.codecogs.com/svg.image?&space;f) rappresenta la frequenza,
+- $f$ rappresenta la frequenza,
 - $T$ rappresenta il periodo, cioè la durata di un singolo ciclo.
 
 L'unità di misura della frequenza è l'Hertz (Hz):
