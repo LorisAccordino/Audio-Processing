@@ -10,13 +10,14 @@ La musica è l'arte dell'organizzazione del suono. Il suono è la sensazione dat
 
 La frequenza è la grandezza fisica che esprime il numero di cicli o oscillazioni di un fenomeno periodico che si verificano in un secondo. In termini più semplici, la frequenza misura il numero di ripetizioni di un evento oscillatorio in un secondo. La formula che esprime la relazione tra frequenza ($f$) e periodo ($T$) è la seguente:
 
-$f = {1 \over T}$
+<!-- $f = {1 \over T}$ -->
 
 ![equation](https://latex.codecogs.com/svg.image?&space;f={1\over&space;T})
 
 Dove:
 
-- $f$ rappresenta la frequenza,
+<!-- - $f$ rappresenta la frequenza, -->
+- ![equation](https://latex.codecogs.com/svg.image?&space;f) rappresenta la frequenza,
 - $T$ rappresenta il periodo, cioè la durata di un singolo ciclo.
 
 L'unità di misura della frequenza è l'Hertz (Hz):
