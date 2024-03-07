@@ -10,15 +10,9 @@ La musica è l'arte dell'organizzazione del suono. Il suono è la sensazione dat
 
 La frequenza è la grandezza fisica che esprime il numero di cicli o oscillazioni di un fenomeno periodico che si verificano in un secondo. In termini più semplici, la frequenza misura il numero di ripetizioni di un evento oscillatorio in un secondo. La formula che esprime la relazione tra frequenza ($f$) e periodo ($T$) è la seguente:
 
-<!-- $f = {1 \over T}$ -->
-
-$f = {1 \over T}$
-
 $$
-  \int_0^\infty \frac{x^3}{e^x-1}\,dx = \frac{\pi^4}{15}
+f = {1 \over T}
 $$
-
-<!-- ![equation](https://latex.codecogs.com/svg.image?&space;f={1\over&space;T}) -->
 
 Dove:
 
@@ -27,9 +21,11 @@ Dove:
 
 L'unità di misura della frequenza è l'Hertz (Hz):
 
-$1 Hz = {1 \over s} = {s^{-1}}$
+$$
+1 Hz = {1 \over s} = {s^{-1}}
+$$
 
-Ad esempio, se abbiamo un suono con una frequenza di 440 Hertz, significa che si verificano 440 cicli sonori al secondo. Le frequenze basse sono percepite come toni gravi, mentre le frequenze alte sono percepite come toni acuti. La nostra mente interpreta queste variazioni di frequenza come variazioni nella tonalità del suono, contribuendo alla ricchezza e alla complessità della nostra percezione uditiva.
+Ad esempio, se abbiamo un suono con una frequenza di 440 Hz, significa che si verificano 440 cicli sonori al secondo. Le frequenze basse sono percepite come toni gravi, mentre le frequenze alte sono percepite come toni acuti. La nostra mente interpreta queste variazioni di frequenza come variazioni nella tonalità del suono, contribuendo alla ricchezza e alla complessità della nostra percezione uditiva.
 
 ## Propagazione del Suono
 
@@ -50,7 +46,7 @@ Il suono è una forma di energia che si propaga attraverso l'aria o altri mezzi 
 Per cogliere appieno la complessità del suono, consideriamo il concetto di armoniche. Le armoniche rappresentano le diverse componenti di frequenza presenti in un suono e giocano un ruolo cruciale nella definizione della sua forma d'onda. Tuttavia, osservare la forma d'onda da sola non ci consente di identificare e suddividere le specifiche frequenze in gioco. Questo sarà oggetto di analisi più approfondite tramite strumenti come l'FFT (Trasformata di Fourier Rapida) e l'analisi spettrale.
 
 ### Armoniche e Componenti di Frequenza:
-Le armoniche sono multipli interi della frequenza fondamentale di un suono. Ad esempio, se la frequenza fondamentale è $f$, le armoniche includono $2f$, $3f$, $4f$, $...$ . Ognuna di queste armoniche contribuisce con la propria intensità e caratteristica al suono complessivo.
+Le armoniche sono multipli interi della frequenza fondamentale di un suono. Ad esempio, se la frequenza fondamentale è $f$, le armoniche includono $2f$, $3f$, $4f$, $…$ . Ognuna di queste armoniche contribuisce con la propria intensità e caratteristica al suono complessivo.
 
 ### Forma d'Onda come Somma di Armoniche:
 Le funzioni sinusoidali sono ampiamente utilizzate per rappresentare matematicamente le armoniche. Ogni sinusoide corrisponde a una singola frequenza, e la combinazione (somma) di diverse onde sinusoidali genera la forma d'onda complessiva. In questo modo, la matematica delle funzioni sinusoidali diventa uno strumento potente per scomporre e comprendere la ricchezza spettrale di un suono.
@@ -86,7 +82,9 @@ Nel contesto dell'audio, il riferimento di 0 dB è associato al volume di defaul
 
 Per comprendere meglio la relazione logaritmica, consideriamo il rapporto di potenze in dB:
 
-$ dB = 10 \log_{10}\left(\frac{W1}{W2}\right) = 10 \log_{10}\left(\frac{V1}{V2}\right)^2 = 20 \log_{10}\left(\frac{V1}{V2}\right) $
+$$ 
+dB = 10 \log_{10}\left(\frac{W1}{W2}\right) = 10 \log_{10}\left(\frac{V1}{V2}\right)^2 = 20 \log_{10}\left(\frac{V1}{V2}\right) 
+$$
 
 In un contesto analogico, potremmo fare riferimento a un segnale di 0 dB come all'assenza di amplificazione o attenuazione. Nel digitale, dove i segnali possono essere rappresentati con precisione numerica, il concetto di dB può anche riflettere la quantità di amplificazione o attenuazione applicata a un segnale.
 
@@ -128,7 +126,9 @@ Quando consideriamo l'ampiezza $A$ nell'ambito delle onde sinusoidali e del camb
 
 Per passare da $A$ (ampiezza lineare della forma d'onda) a $dB$ (volume percepito), possiamo utilizzara la seguente formula:
 
-$ dB = 20 \log_{10}(A)$
+$$
+dB = 20 \log_{10}(A)
+$$
 
 Questa formula ci permette di calcolare i dB a partire dall'ampiezza $(A)$. Tuttavia, è importante notare che una rappresentazione di ampiezza oltre 1 $(A > 1)$ può portare a un aumento del volume con possibile distorsione (clipping) audio. Nel dominio digitale, ciò si traduce nel "ritaglio" (clipping) dei valori al di fuori dell'immagine della funzione sinusoidale $[-1,+1]$. Questo troncamento può causare una riproduzione distorta della forma d'onda, mentre a livello analogico (come nella riproduzione tramite casse), il clipping si manifesta come una distorsione vera e propria, alterando significativamente la qualità del suono con conseguente riproduzione distorta e rovinata.
 
@@ -141,7 +141,9 @@ Esploreremo come il cambiamento di pitch, ossia la variazione della frequenza de
 
 In linea teorica, avendo già a disposizione (per esempio tramite FFT) tutte le componenti sinusoidali della forma d'onda, per applicare un cambiamento di pitch $(P)$ a un segnale audio, possiamo rappresentare la trasformazione dell'onda sinusoidale di frequenza $f$ come segue:
 
-$\sin(f) → \sin(f \cdot P)$
+$$
+\sin(f) → \sin(f \cdot P)
+$$
 
 Dove:
 
@@ -150,11 +152,14 @@ Dove:
 
 Se consideriamo un'onda complessa con più componenti sinusoidali, la formula generale per applicare il pitch a tutte le componenti sarebbe una somma:
 
-$ \sum_{i=1}^{n}  \sin(P \cdot f_i) $
+$$
+\sum_{i=1}^{n}  \sin(P \cdot f_i)
+$$
 
 Oppure, più semplicemente:
 
-$ \sin(f_1 \cdot P) + \sin(f_2 \cdot P) + … + \sin(f_n \cdot P) $
+$$ 
+\sin(f_1 \cdot P) + \sin(f_2 \cdot P) + … + \sin(f_n \cdot P) $$
 
 Dove $f_i$ rappresenta le frequenze delle diverse componenti sinusoidali presenti nel segnale originale.
 
@@ -172,7 +177,9 @@ Se desideriamo velocizzare o rallentare un brano senza alterarne il pitch, dobbi
 
 La formula per calcolare il pitch $(P)$ in funzione del coefficiente di velocità di riproduzione $(V)$ è la seguente:
 
-$ P = {1 \over V} = V^{-1}$
+$$ 
+P = {1 \over V} = V^{-1}
+$$
 
 Quindi, se vogliamo mantenere costante il pitch mentre cambiamo la velocità, dobbiamo regolare il pitch in modo inversamente proporzionale alla velocità desiderata, in modo da compensare il cambio di tonalità causato dalla variazione del sample rate. Questo ci consentirà di ottenere l'effetto desiderato di velocizzazione o rallentamento senza alterare l'intonazione del suono.
 
@@ -187,7 +194,9 @@ La Trasformata di Fourier Rapida (FFT) è un algoritmo che consente di scomporre
 
 La formula della FFT è complessa, ma in termini generali, essa trasforma un segnale dal dominio del tempo a quello della frequenza. Ecco la rappresentazione matematica di una delle sue più semplici (ma meno performanti) implementazioni:
 
-$ X(k) = \sum_{n=0}^{N-1} x(n) \cdot e^{-i {2 \pi \over N} kn}$
+$$ 
+X(k) = \sum_{n=0}^{N-1} x(n) \cdot e^{-i {2 \pi \over N} kn}
+$$
 
 Dove:
 
