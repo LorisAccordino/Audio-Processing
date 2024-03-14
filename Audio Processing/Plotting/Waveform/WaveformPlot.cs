@@ -1,25 +1,31 @@
 ﻿using AudioProcessing.Plotting.Waveform.Strategy;
 using AudioProcessing.Audio;
-using AudioProcessing.Audio.DSP;
 using AudioProcessing.Events;
 using ScottPlot.Plottables;
 using ScottPlot.WinForms;
+using System.Diagnostics;
+using AudioProcessing.Common;
 
 namespace AudioProcessing.Plotting.Waveform
 {
     public class WaveformPlot : IWaveformPlot
     {
-        public FormsPlot FormsPlot { get; private set; }
-        public DataStreamer WavePlot { get; private set; }
-        public Control ParentControl { get; private set; }
+        // Readonly properties
+        public readonly FormsPlot formsPlot;
+        public readonly DataStreamer wavePlot;
+        public readonly Control? parentControl;
 
+        // Timing
+        private Stopwatch frameTimer = new Stopwatch();
 
         private IWaveformPlotStrategy channelStrategy;
 
 
         // Zoom
-        private int waveformZoom = 1;
-        public int Zoom
+        private float zoomMultiplier = 1;
+        private bool zoomFlag = false;
+        private float waveformZoom = 1;
+        public float Zoom
         {
             get
             {
@@ -28,34 +34,60 @@ namespace AudioProcessing.Plotting.Waveform
             set
             {
                 waveformZoom = value;
+                if (!zoomFlag)
+                {
+                    zoomFlag = true;
+                    OnZoomChanged(this, new ValueEventArgs<float>(value));
+                    zoomFlag = false;
+                }
             }
         }
 
         public bool RefreshRequested { get; set; } = true;
 
-        public WaveformPlot(FormsPlot formsPlot, string title, Mixer.AudioChannel channel)
+        public WaveformPlot(FormsPlot plot, string title, AudioChannel channel)
         {
-            FormsPlot = formsPlot;
-            ParentControl = formsPlot.Parent;
+            // Check version
+            ScottPlot.Version.ShouldBe(5, 0, 21);
+
+            // Set parent control
+            parentControl = plot.Parent;
+
+            // Set formsPlot
+            formsPlot = plot;      
+            formsPlot.Interaction.Disable();
+            formsPlot.Plot.HideGrid();
+            formsPlot.Plot.Title(title);
+            formsPlot.Plot.Axes.SetLimitsY(-1, 1);
+
+            // Set waveform plot
+            wavePlot = formsPlot.Plot.Add.DataStreamer(AudioProcessor.SAMPLE_RATE);
+            formsPlot.Plot.Axes.SetLimitsX(0, AudioProcessor.SAMPLE_RATE);
+            wavePlot.ViewScrollLeft();
+            wavePlot.ManageAxisLimits = false;
+
+            // Zoom settings
+            zoomMultiplier = AudioProcessor.SAMPLE_RATE / (AudioProcessor.CHUNK_SIZE * 100f);
+            Zoom = 1;
 
             // Assign the correct channel to the plot
             AssignChannel(channel);
 
-            // Initialize plot
-            InitializeWaveformPlot(title);
+            // Start the frame timer
+            frameTimer.Start();
         }
 
-        private void AssignChannel(Mixer.AudioChannel channel)
+        private void AssignChannel(AudioChannel channel)
         {
             switch (channel)
             {
-                case Mixer.AudioChannel.STEREO:
+                case AudioChannel.Stereo:
                     channelStrategy = new StereoWaveformPlotStrategy();
                     break;
-                case Mixer.AudioChannel.LEFT_CHANNEL:
+                case AudioChannel.LeftChannel:
                     channelStrategy = new LeftChannelWaveformPlotStrategy();
                     break;
-                case Mixer.AudioChannel.RIGHT_CHANNEL:
+                case AudioChannel.RightChannel:
                     channelStrategy = new RightChannelWaveformPlotStrategy();
                     break;
                 default:
@@ -63,38 +95,21 @@ namespace AudioProcessing.Plotting.Waveform
             }
         }
 
-        private void InitializeWaveformPlot(string title)
-        {
-            ScottPlot.Version.ShouldBe(5, 0, 21);
-
-            // Set formsPlot
-            FormsPlot.Interaction.Disable();
-            FormsPlot.Plot.HideGrid();
-            FormsPlot.Plot.Title(title);
-            FormsPlot.Plot.Axes.SetLimitsY(-1, 1);
-
-            // Set waveform plot
-            WavePlot = FormsPlot.Plot.Add.DataStreamer(AudioProcessor.CHUNK_SIZE);
-            FormsPlot.Plot.Axes.SetLimitsX(0, AudioProcessor.CHUNK_SIZE);
-            WavePlot.ViewScrollLeft();
-            WavePlot.ManageAxisLimits = false;
-            Zoom = 1;
-        }
-
-        private long counter;
-
         public void AddPoint(double y)
         {
-            if (counter % (waveformZoom * 2) == 0)
-            {
-                WavePlot.Add(y);
-            }
-            counter++;
+            wavePlot.Add(y);
         }
 
         public void Update(float[] floatBuffer)
         {
             channelStrategy.UpdatePlot(floatBuffer, this);
+
+            if (frameTimer.ElapsedMilliseconds < 1000f / AudioProcessor.TARGET_FPS)
+            {
+                return;
+            }
+
+            frameTimer.Restart();
 
             // Refresh plots
             RefreshPlot();
@@ -108,15 +123,21 @@ namespace AudioProcessing.Plotting.Waveform
                 return;
             }
 
-            FormsPlot.Invoke((MethodInvoker)delegate
+            formsPlot.Invoke((MethodInvoker)delegate
             {
-                FormsPlot.Refresh();
+                formsPlot.Refresh();
             });
         }
 
-        public void OnZoomChanged(object? sender, ValueChangedEventArgs e)
+        public void OnZoomChanged(object? sender, ValueEventArgs<float> e)
         {
-            Zoom = (int)e.NewValue;
+            if (!zoomFlag)
+            {
+                zoomFlag = true;
+                Zoom = e.Value;
+                zoomFlag = false;
+            }
+            formsPlot.Plot.Axes.SetLimitsX(AudioProcessor.SAMPLE_RATE - (AudioProcessor.CHUNK_SIZE * (Zoom * zoomMultiplier)), AudioProcessor.SAMPLE_RATE);
         }
     }
 }

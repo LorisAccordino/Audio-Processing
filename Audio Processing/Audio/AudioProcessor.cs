@@ -1,128 +1,127 @@
 ﻿using AudioProcessing.Plotting;
-using AudioProcessing.GUI;
 using NAudio.Wave;
 using AudioProcessing.Audio.DSP;
+using AudioProcessing.Common;
 
 namespace AudioProcessing.Audio
 {
     public class AudioProcessor
     {
+        // Instance
+        private static AudioProcessor _instance;
+        public static AudioProcessor Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new AudioProcessor();
+                }
+                return _instance;
+            }
+        }
+
         // Consts
-        public const int CHUNK_SIZE = 4096;
-        public const int SAMPLE_RATE = 44100;
-        public const int CHANNELS = 2;
+        public const int CHUNK_SIZE = 256;
+        public const int SAMPLE_RATE = 44100; // 44.1 kHz
+        public const int CHANNELS = 2; // Stereo Audio
+        public const int TARGET_FPS = 30;
+        public static readonly WaveFormat WAVE_FORMAT = new WaveFormat(SAMPLE_RATE, CHANNELS);  
 
-        public static readonly WaveFormat WAVE_FORMAT = new WaveFormat(SAMPLE_RATE, CHANNELS);
 
-        // Audio reading/streaming
-        public PlaybackManager PlaybackManager { get; private set; }
-        private Thread readThread;
-
-        // Audio processing/mixing
+        // Audio
         public Mixer Mixer { get; private set; }
-        public VuMeter VuMeter { get; private set; }
+        public PlaybackManager PlaybackManager { get; private set; }
+        public VuMeter VuMeter { get; private set; } = new VuMeter();
+
+        // Synth
+        public Synthesizer Synthesizer { get { return synthesizerDialog.synthesizer; } }
+        private SynthesizerDialog synthesizerDialog = new SynthesizerDialog();
+
 
         // Plotters
-        private WaveformPlotter waveformPlotter;
-        private FFTPlotter fftPlotter;
+        public WaveformPlotter WaveformPlotter { get; private set; } = new WaveformPlotter();
+        public FFTPlotter FFTplotter { get; set; }
 
-        public AudioProcessor(ISampleProvider sourceProvider)
+        // Thread
+        private Thread thread;
+        private float[] floatBuffer;
+        private bool shouldClose = false;
+
+        public AudioProcessor()
+        {
+            floatBuffer = new float[CHUNK_SIZE];
+        }
+
+        public void StartWAV(ISampleProvider sourceProvider)
         {
             PlaybackManager = new PlaybackManager(sourceProvider, WAVE_FORMAT);
+            PlaybackManager.SpeedChanged += OnSpeedChanged;
             Mixer = new Mixer(PlaybackManager.SMB);
+
+            // Init waveform EQs
+            WaveformPlotter.InitEQs(PlaybackManager.SMB); 
         }
 
-        public void Start()
+        public void StartThread()
         {
-            // Start stream reading in separate thread
-            readThread = new Thread(ReadStream);
-            readThread.Start();
+            // Start thread
+            thread = new Thread(ThreadRoutine);
+            thread.Start();
         }
 
-        public void AddVuMeter(VolumeMeter leftVolume, VolumeMeter rightVolume)
+        public void StartSynth()
         {
-            VuMeter = new VuMeter(leftVolume, rightVolume);
+            synthesizerDialog.Show();
         }
 
-        public void AddPlotters(WaveformPlotter waveformPlotter, FFTPlotter fftPlotter)
+        private void OnSpeedChanged(object? sender, EventArgs e)
         {
-            this.waveformPlotter = waveformPlotter;
-            this.fftPlotter = fftPlotter;
+            float speed = PlaybackManager.PlaybackSpeed;
+            int dynamicChunkSize = (int)((CHUNK_SIZE * speed) / 4) * 4;
+            floatBuffer = new float[Math.Max(4, dynamicChunkSize)];
         }
 
-        public float[] ConvertBytesToFloat(byte[] byteArray)
+        private void ThreadRoutine()
         {
-            // Determina il numero di byte per campione (ad esempio, 2 byte per PCM a 16 bit)
-            int bytesPerSample = 2;
-
-            // Calcola il numero di campioni nel buffer di byte
-            int numSamples = byteArray.Length / bytesPerSample;
-
-            // Inizializza l'array di float
-            float[] floatArray = new float[numSamples];
-
-            // Effettua la conversione da byte a float
-            for (int i = 0; i < numSamples; i++)
-            {
-                // Leggi il valore a 16 bit dal buffer di byte
-                short sampleValue = BitConverter.ToInt16(byteArray, i * bytesPerSample);
-
-                // Normalizza il valore a float nell'intervallo -1.0 a 1.0
-                float normalizedValue = sampleValue / 32768.0f;
-
-                // Assegna il valore normalizzato all'array di float
-                floatArray[i] = normalizedValue;
-            }
-
-            return floatArray;
-        }
-
-        private void ReadStream()
-        {
-            byte[] buffer = new byte[CHUNK_SIZE * sizeof(float)];
-            float[] floatBuffer = new float[CHUNK_SIZE];
-
+            byte[] buffer = new byte[CHUNK_SIZE];
             while (Mixer.Read(floatBuffer, 0, floatBuffer.Length) > 0 && PlaybackManager.IsAlive())
             {
                 // Apply volume and get VU meter level
                 VuMeter.ApplyVolumeAndPan(floatBuffer);
 
-                short[] shortBuffer = ConversionUtils.ConvertFloatArrayToShortArray(floatBuffer);
-                buffer = ConversionUtils.ConvertShortArrayToByteArray(shortBuffer);
+                // Update waveforms plots
+                WaveformPlotter.UpdateWaveformPlots(floatBuffer);
 
-                // Apply varispeed on playback
-                PlaybackManager.AdjustSpeed(buffer);
+                // Convert float buffer to bytes buffer to apply speed
+                buffer = BufferConverter.ConvertFloatToByte(floatBuffer);
 
-                floatBuffer = ConvertBytesToFloat(buffer);
+                // Apply speed
+                PlaybackManager.ApplySpeed(buffer);
 
-                // Update waveforms and fft plots
-                waveformPlotter.UpdateWaveformPlots(floatBuffer);
-                fftPlotter.UpdateFFTPlot(floatBuffer, PlaybackManager.PlaybackSpeed);
+                // Convert bytes buffer to float buffer "again" (to avoid issues on FFT)
+                floatBuffer = BufferConverter.ConvertByteToFloat(buffer);
+
+                // Update fft plot
+                FFTplotter.UpdateFFTPlot(floatBuffer, PlaybackManager.PlaybackSpeed);
 
                 // Wait for the buffer to empty enough
                 while (PlaybackManager.IsBufferOverfull() && PlaybackManager.IsAlive())
                 {
                     Thread.Sleep(10);
                 }
-
-
-                // TO TEST!!!
-                float speed = PlaybackManager.PlaybackSpeed;
-                int dynamicChunkSize = (int)((CHUNK_SIZE * speed) / 4) * 4;
-                floatBuffer = new float[dynamicChunkSize];
             }
-        }
 
-        private void UpdateEQ(EqualizerBand[] equalizerBands)
-        {
-            throw new NotImplementedException();
+            if (shouldClose)
+            {
+                Application.Exit();
+            }
         }
 
         public void Close()
         {
             PlaybackManager.Close();
-            // Wait for the read thread to finish before closing the form
-            readThread.Join();
+            shouldClose = true;
         }
     }
 }

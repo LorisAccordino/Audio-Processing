@@ -62,7 +62,7 @@ public class SMBPitchShifter
     private float[] gAnaMagn = new float[MAX_FRAME_LENGTH];
     private float[] gSynFreq = new float[MAX_FRAME_LENGTH];
     private float[] gSynMagn = new float[MAX_FRAME_LENGTH];
-    private long gRover, gInit;
+    private long gRover;
 
     public void PitchShift(float pitchShift, long numSampsToProcess,
        float sampleRate, float[] indata)

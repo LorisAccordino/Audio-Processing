@@ -1,31 +1,32 @@
 ﻿using AudioProcessing.Audio;
 using AudioProcessing.Audio.DSP;
-using AudioProcessing.Events;
+using AudioProcessing.Common;
 using ScottPlot.Plottables;
 using ScottPlot.WinForms;
+using System.Diagnostics;
 
 namespace AudioProcessing.Plotting
 {
     public class FFTPlotter
     {
-        private const int MAX_QUEUE_SIZE = 4;
+        private const int MAX_QUEUE_SIZE = 100;
 
         private Queue<float[]> audioDataQueue = new Queue<float[]>();
-        private FastFourierTransform fft;
-        private Tuner tuner;
+        private FastFourierTransform fft = new FastFourierTransform(AudioProcessor.SAMPLE_RATE);
 
-        public FormsPlot FormsPlot { get; private set; }
-        private DataLogger fftPlot;
+        public Tuner Tuner { get; private set; } = new Tuner();
+        public readonly FormsPlot formsPlot;
+        private readonly DataLogger fftPlot;
 
         public double MaxDbRange
         {
             get
             {
-                return FormsPlot.Plot.Axes.GetLimits().YRange.Max;
+                return formsPlot.Plot.Axes.GetLimits().YRange.Max;
             }
             set
             {
-                FormsPlot.Plot.Axes.SetLimitsY(-40, value);
+                formsPlot.Plot.Axes.SetLimitsY(-40, value);
             }
         }
 
@@ -33,43 +34,37 @@ namespace AudioProcessing.Plotting
         {
             get
             {
-                return FormsPlot.Plot.Axes.GetLimits().XRange.Max;
+                return formsPlot.Plot.Axes.GetLimits().XRange.Max;
             }
             set
             {
-                FormsPlot.Plot.Axes.SetLimitsX(0, value);
+                formsPlot.Plot.Axes.SetLimitsX(0, value);
             }
         }
 
-        public FFTPlotter(FormsPlot formsPlot, int sampleRate)
+        // Timing
+        private Stopwatch frameTimer = new Stopwatch();
+
+        public FFTPlotter(FormsPlot formsPlot)
         {
-            FormsPlot = formsPlot;
-            fft = new FastFourierTransform(sampleRate);
+            // Initialize forms plot
+            this.formsPlot = formsPlot;
+            formsPlot.Plot.Title("FFT Spectrum");
+            formsPlot.Plot.YLabel("Amplitude (dB)");
+            formsPlot.Plot.XLabel("Frequency (Hz)");
+            formsPlot.Interaction.Disable();
 
             // Initialize plot
-            InitializePlot();
-
-            // Set values to default
-            MaxDbRange = 3;
-            MaxHzRange = 20000;
-        }
-
-        private void InitializePlot()
-        {
-            FormsPlot.Interaction.Disable();
-            fftPlot = FormsPlot.Plot.Add.DataLogger();
-
+            fftPlot = formsPlot.Plot.Add.DataLogger();
             fftPlot.ViewFull();
             fftPlot.ManageAxisLimits = false;
 
-            FormsPlot.Plot.Title("FFT Spectrum");
-            FormsPlot.Plot.YLabel("Amplitude (dB)");
-            FormsPlot.Plot.XLabel("Frequency (Hz)");
-        }
+            // Set values to default
+            MaxDbRange = 3;
+            MaxHzRange = 16000;
 
-        public void AddTuner(Label toneLabel)
-        {
-            tuner = new Tuner(toneLabel);
+            // Start the frame timer
+            frameTimer.Start();
         }
 
         public void UpdateFFTPlot(float[] audioData, float speed)
@@ -78,10 +73,20 @@ namespace AudioProcessing.Plotting
             audioDataQueue.Enqueue(audioData);
 
             // If the queue has reached the max size, remove the oldest frame
-            if (audioDataQueue.Count > (int)Math.Clamp(MAX_QUEUE_SIZE * speed, 0.01, 4))
+            if (audioDataQueue.Count > MAX_QUEUE_SIZE / speed)
             {
-                audioDataQueue.Dequeue();
+                while (audioDataQueue.Count > MAX_QUEUE_SIZE / speed)
+                {
+                    audioDataQueue.Dequeue();
+                }
             }
+
+            if (frameTimer.ElapsedMilliseconds < 1000f / AudioProcessor.TARGET_FPS)
+            {
+                return;
+            }
+
+            frameTimer.Restart();
 
             // Calculate FFT on queue of audio frames
             float[] concatenatedData = audioDataQueue.SelectMany(data => data).ToArray();
@@ -94,26 +99,26 @@ namespace AudioProcessing.Plotting
             {
                 if (fftPlot.Data.Coordinates.Count > i)
                 {
-                    fftPlot.Data.Coordinates[i] = new ScottPlot.Coordinates(fFTResult.frequencies[i], VuMeter.LogVolumeToLinearVolume(fFTResult.spectrum[i]) + VuMeter.MIN_DECIBEL);
+                    fftPlot.Data.Coordinates[i] = new ScottPlot.Coordinates(fFTResult.frequencies[i], (float)VolumeConverter.LogVolumeToLinearAmplitude(fFTResult.spectrum[i]) + VolumeConverter.MIN_DECIBEL);
                 }
                 else
                 {
-                    fftPlot.Add(fFTResult.frequencies[i], VuMeter.LogVolumeToLinearVolume(fFTResult.spectrum[i]) + VuMeter.MIN_DECIBEL);
+                    fftPlot.Add(fFTResult.frequencies[i], VolumeConverter.LogVolumeToLinearAmplitude(fFTResult.spectrum[i]) + VolumeConverter.MIN_DECIBEL);
                 }
             }
 
-            tuner.UpdateTone(fFTResult);
+            Tuner.UpdateTone(fFTResult);
 
-            FormsPlot.Invoke((MethodInvoker)delegate
+            formsPlot.Invoke((MethodInvoker)delegate
             {
-                FormsPlot.Refresh();
+                formsPlot.Refresh();
             });
         }
 
         public void Clear()
         {
             fftPlot.Data.Clear();
-            FormsPlot.Refresh();
+            formsPlot.Refresh();
         }
     }
 }

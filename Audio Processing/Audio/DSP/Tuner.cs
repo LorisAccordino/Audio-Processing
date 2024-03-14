@@ -1,21 +1,29 @@
-﻿namespace AudioProcessing.Audio.DSP
+﻿using AudioProcessing.Common;
+using AudioProcessing.Events;
+
+namespace AudioProcessing.Audio.DSP
 {
     public class Tuner
     {
-        private Label toneLabel;
-
-        public Tuner(Label toneLabel)
+        // Events
+        public event EventHandler<ValueEventArgs<string>>? ToneChanged;
+        public ActionWithInvoke<string>? ToneChangedAction { get; set; }
+        public void OnToneUpdated(ValueEventArgs<string> e)
         {
-            this.toneLabel = toneLabel;
+            ToneChanged?.Invoke(this, e);
+            ToneChangedAction?.Execute(e.Value);
+        }
+
+        public Tuner()
+        {
+
         }
 
         public void UpdateTone(FastFourierTransform.FFTResult fftResult)
         {
             double currentTone = ToneFromFFT(fftResult);
-            toneLabel.Invoke((MethodInvoker)delegate
-            {
-                toneLabel.Text = FrequencyToNote(currentTone);
-            });
+            string formattedString = Utils.FormatMusicalNote(currentTone) + " / " + Utils.FormatMusicalNote(currentTone, true) + $"\n ({(int)currentTone} Hz)";
+            OnToneUpdated(new ValueEventArgs<string>(formattedString));
         }
 
         public double ToneFromFFT(FastFourierTransform.FFTResult fftResult)
@@ -25,100 +33,6 @@
 
             // Return the corresponding frequency with the maximum amplitude (current tone)
             return fftResult.frequencies[maxIndex];
-        }
-
-        private string FrequencyToNote(double frequency)
-        {
-            if (frequency <= 0)
-            {
-                return toneLabel.Text;
-            }
-
-            // Reference frequency for A4 (La4) in Hz
-            //double referenceFrequency = 440.0;
-            double referenceFrequency = 261.6;
-
-            // Calculate semitone difference compared to A4
-            double semitoneDifference = 12.0 * Math.Log2(frequency / referenceFrequency);
-
-            // Semitone mapping to note
-            string[] noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
-
-            int noteIndex = (int)Math.Round(semitoneDifference) % 12;
-            if (noteIndex < 0)
-            {
-                noteIndex += 12;
-            }
-
-            //int octave = 4 + (int)Math.Floor((semitoneDifference + 9) / 12); // A4 is in the 4th octave
-            int octave = 4 + (int)Math.Floor((semitoneDifference) / 12); // A4 is in the 4th octave
-
-            // Format note as string
-            string formattedNote = $"{noteNames[noteIndex]}{octave}";
-
-            // Add Italian note name (e.g., "C" -> "DO")
-            string italianNoteName = TranslateToItalian(noteNames[noteIndex]);
-            formattedNote += $" / {italianNoteName}{octave}";
-
-            // Return the formatted string with frequency and note (limited to 1 decimal place)
-            return $"{formattedNote} ({frequency:F1} Hz)";
-        }
-
-        /*private string FrequencyToNote(double frequency)
-        {
-            if (frequency <= 0)
-            {
-                return "Invalid frequency";
-            }
-
-            // Reference frequency for A4 (La4) in Hz
-            double referenceFrequency = 440.0;
-
-            // Calculate semitone difference compared to A4
-            double semitoneDifference = 12.0 * Math.Log2(frequency / referenceFrequency);
-
-            // Semitone mapping to note
-            string[] noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
-
-            int noteIndex = (int)Math.Round(semitoneDifference) % 12;
-            if (noteIndex < 0)
-            {
-                noteIndex += 12;
-            }
-
-            int octave = 4 + (int)Math.Floor(semitoneDifference / 12.0); // Aggiustamento dell'ottava
-
-            // Format note as string
-            string formattedNote = $"{noteNames[noteIndex]}{octave}";
-
-            // Add Italian note name (e.g., "C" -> "DO")
-            string italianNoteName = TranslateToItalian(noteNames[noteIndex]);
-            formattedNote += $" / {italianNoteName}{octave}";
-
-            return formattedNote;
-        }*/
-
-
-        private string TranslateToItalian(string englishNoteName)
-        {
-            // Mappings of English/Italian notes names
-            Dictionary<string, string> italianNoteNames = new Dictionary<string, string>
-            {
-                { "C", "DO" },
-                { "C#", "DO#" },
-                { "D", "RE" },
-                { "D#", "RE#" },
-                { "E", "MI" },
-                { "F", "FA" },
-                { "F#", "FA#" },
-                { "G", "SOL" },
-                { "G#", "SOL#" },
-                { "A", "LA" },
-                { "A#", "LA#" },
-                { "B", "SI" }
-            };
-
-            return italianNoteNames.TryGetValue(englishNoteName, out string italianNote) ? italianNote : englishNoteName;
         }
     }
 }

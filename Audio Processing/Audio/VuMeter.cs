@@ -1,57 +1,49 @@
-﻿using AudioProcessing.Events;
-using AudioProcessing.GUI;
+﻿using AudioProcessing.Common;
+using AudioProcessing.Events;
+using System.Diagnostics;
 
 namespace AudioProcessing.Audio
 {
     public class VuMeter
     {
-        public const int MAX_DECIBEL = 3;
-        public const int MIN_DECIBEL = -40;
 
-        private VolumeMeter leftVolume;
-        private VolumeMeter rightVolume;
-        public float LeftVuLevel
-        {
-            get
-            {
-                return leftVolume.VolumeLevel;
-            }
-            private set
-            {
-                leftVolume.VolumeLevel = value;
-            }
-        }
-        public float RightVuLevel
-        {
-            get
-            {
-                return rightVolume.VolumeLevel;
-            }
-            private set
-            {
-                rightVolume.VolumeLevel = value;
-            }
-        }
-
+        // Properties
         public float Volume { get; set; }
         public float Pan { get; set; }
         public bool IsStereo { get; set; }
 
-        public VuMeter(VolumeMeter leftVolume, VolumeMeter rightVolume)
-        {
-            this.leftVolume = leftVolume;
-            this.rightVolume = rightVolume;
+        // Timing
+        private Stopwatch frameTimer = new Stopwatch();
 
+        // Events
+        public event EventHandler<ValueEventArgs<StereoVolume>>? VolumeChanged;
+        public event EventHandler<ValueEventArgs<float>>? SpeakerUpdated;
+
+        public void OnVolumeChanged(ValueEventArgs<StereoVolume> e)
+        {
+            VolumeChanged?.Invoke(this, e);
+        }
+
+        public void OnSpeakerUpdated(ValueEventArgs<float> e)
+        {
+            SpeakerUpdated?.Invoke(this, e);
+        }
+
+        public VuMeter()
+        {
             // Set values to default
             Pan = 0.0f;
             Volume = 1.0f;
             IsStereo = true;
+
+            // Start the frame timer
+            frameTimer.Start();
         }
 
         public void ApplyVolumeAndPan(float[] buffer)
         {
-            float LeftVuMeterLevel = MIN_DECIBEL;
-            float RightVuMeterLevel = MIN_DECIBEL;
+            float LeftVuMeterLevel = float.MinValue;
+            float RightVuMeterLevel = float.MinValue;
 
             float leftVolume = Math.Clamp((1.0f - (Pan + 1.0f) / 2.0f) * 2.0f, 0.0f, 1.0f);
             float rightVolume = Math.Clamp((1.0f + (Pan - 1.0f) / 2.0f) * 2.0f, 0.0f, 1.0f);
@@ -66,7 +58,6 @@ namespace AudioProcessing.Audio
 
                 buffer[i] = Math.Clamp(unclampedVolume * currentVolume, -1, 1);
 
-
                 if (!IsStereo)
                 {
                     buffer[++i] = Math.Clamp(unclampedVolume * rightVolume, -1, 1);
@@ -75,42 +66,43 @@ namespace AudioProcessing.Audio
                 // Update VU meter level
                 if (i % 2 == 0)
                 {
-                    LeftVuMeterLevel = VuMeterVolume(unclampedVolume * leftVolume, LeftVuMeterLevel);
+                    LeftVuMeterLevel = UpdateVuMeter(unclampedVolume * leftVolume, LeftVuMeterLevel);
                 }
                 else
                 {
-                    RightVuMeterLevel = VuMeterVolume(unclampedVolume * rightVolume, RightVuMeterLevel);
+                    RightVuMeterLevel = UpdateVuMeter(unclampedVolume * rightVolume, RightVuMeterLevel);
 
                     if (!IsStereo)
                     {
-                        LeftVuMeterLevel = VuMeterVolume(unclampedVolume * leftVolume, LeftVuMeterLevel);
+                        LeftVuMeterLevel = UpdateVuMeter(unclampedVolume * leftVolume, LeftVuMeterLevel);
                     }
                 }
             }
 
-            LeftVuLevel = LeftVuMeterLevel;
-            RightVuLevel = RightVuMeterLevel;
+            if (frameTimer.ElapsedMilliseconds >= 1000f / AudioProcessor.TARGET_FPS)
+            {
+                OnSpeakerUpdated(new ValueEventArgs<float>(buffer[0]));
+                OnVolumeChanged(new ValueEventArgs<StereoVolume>(new StereoVolume(LeftVuMeterLevel, RightVuMeterLevel)));
+                frameTimer.Restart();
+            }
         }
 
-        private float VuMeterVolume(float unclampedVolume, float currentLevel)
+        private float UpdateVuMeter(float unclampedVolume, float previousVolume)
         {
-            float currentVolume = LinearVolumeToLogVolume(Math.Abs(unclampedVolume), MIN_DECIBEL);
-            return Math.Max(currentLevel, currentVolume);
+            float currentVolume = (float)VolumeConverter.LinearAmplitudeToLogVolume(Math.Abs(unclampedVolume));
+            return Math.Max(previousVolume, currentVolume);
         }
+    }
 
-        public float LinearVolumeToLogVolume(float amplitude, float minAmplitude)
-        {
-            return (float)Math.Log10(Math.Max(Math.Abs(amplitude), Math.Pow(10, minAmplitude / 20))) * 20.0f;
-        }
+    public struct StereoVolume
+    {
+        public float LeftVolume;
+        public float RightVolume;
 
-        public static float LogVolumeToLinearVolume(float amplitude)
+        public StereoVolume(float leftVolume, float rightVolume)
         {
-            return (float)(Math.Pow(10, amplitude / 20) - Math.Pow(10, MIN_DECIBEL / 20));
-        }
-
-        public static double LogVolumeToLinearVolume(double amplitude)
-        {
-            return (double)(Math.Pow(10, amplitude / 20) - Math.Pow(10, MIN_DECIBEL / 20));
+            this.LeftVolume = leftVolume;
+            this.RightVolume = rightVolume;
         }
     }
 }

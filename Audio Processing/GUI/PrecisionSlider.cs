@@ -10,10 +10,8 @@ namespace AudioProcessing.GUI
         Exponential
     }
 
-    public class PrecisionSlider : Control
+    public class PrecisionSlider : PrecisionControl
     {
-        public event EventHandler<ValueChangedEventArgs> ValueChanged;
-
         private TrackBar trackBar;
         private Label descriptionLabel;
         private Label valueLabel;
@@ -103,9 +101,9 @@ namespace AudioProcessing.GUI
             }
         }
 
-        private float internalValue;
+        private double internalValue;
         [DefaultValue(2.5)]
-        public float Value
+        public double Value
         {
             get { return internalValue; }
             set
@@ -127,7 +125,7 @@ namespace AudioProcessing.GUI
                     trackBar.Value = normalizedValue;
 
                     // Raise event
-                    OnValueChanged(new ValueChangedEventArgs(internalValue));
+                    OnValueChanged(new ValueEventArgs<double>(internalValue));
 
                     // Update the value label
                     UpdateValueLabel();
@@ -137,7 +135,7 @@ namespace AudioProcessing.GUI
             }
         }
 
-        private int CalculateTrackBarValue(float value)
+        private int CalculateTrackBarValue(double value)
         {
             switch (PrecisionScale)
             {
@@ -150,7 +148,7 @@ namespace AudioProcessing.GUI
             }
         }
 
-        private float CalculateInternalValue(int trackBarValue)
+        private double CalculateInternalValue(int trackBarValue)
         {
             switch (PrecisionScale)
             {
@@ -163,44 +161,38 @@ namespace AudioProcessing.GUI
             }
         }
 
-        private float MapLinearToLog(float originalValue, float min, float max)
+        private double MapLinearToLog(double originalValue, double min, double max)
         {
             double normalizedValue = NormalizeValue(originalValue, min, max, 1, 10);
             double log = Math.Log10(normalizedValue);
-            return NormalizeValue((float)log, 0, 1, min * Precision, max * Precision);
+            return NormalizeValue(log, 0, 1, min * Precision, max * Precision);
         }
 
-        private float MapLinearToExp(float originalValue, float min, float max)
+        private double MapLinearToExp(double originalValue, double min, double max)
         {
             double normalizedValue = NormalizeValue(originalValue, min, max, 0, 1);
             double pow = Math.Pow(10, normalizedValue);
-            return NormalizeValue((float)pow, 1, 10, min * Precision, max * Precision);
+            return NormalizeValue(pow, 1, 10, min * Precision, max * Precision);
         }
 
-        private float MapExpToLinear(float normalizedValue, float minOriginal, float maxOriginal)
+        private double MapExpToLinear(double normalizedValue, double minOriginal, double maxOriginal)
         {
             double value = NormalizeValue(normalizedValue, minOriginal, maxOriginal, 1, 10);
             double log = Math.Log10(value);
-            return NormalizeValue((float)log, 0, 1, minOriginal / Precision, maxOriginal / Precision);
+            return NormalizeValue(log, 0, 1, minOriginal / Precision, maxOriginal / Precision);
         }
 
-        private float MapLogToLinear(float normalizedValue, float minOriginal, float maxOriginal)
+        private double MapLogToLinear(double normalizedValue, double minOriginal, double maxOriginal)
         {
             double value = NormalizeValue(normalizedValue, minOriginal, maxOriginal, 0, 1);
             double pow = Math.Pow(10, value);
-            return NormalizeValue((float)pow, 1, 10, minOriginal / Precision, maxOriginal / Precision);
+            return NormalizeValue(pow, 1, 10, minOriginal / Precision, maxOriginal / Precision);
         }
 
-        private float NormalizeValue(float originalValue, float minOriginal, float maxOriginal, float minNew, float maxNew)
+        private double NormalizeValue(double originalValue, double minOriginal, double maxOriginal, double minNew, double maxNew)
         {
-            float normalizedValue = (originalValue - minOriginal) / (maxOriginal - minOriginal);
+            double normalizedValue = (originalValue - minOriginal) / (maxOriginal - minOriginal);
             return normalizedValue * (maxNew - minNew) + minNew;
-        }
-
-
-        protected virtual void OnValueChanged(ValueChangedEventArgs e)
-        {
-            ValueChanged?.Invoke(this, e);
         }
 
         private void UpdateTrackBarRange()
@@ -244,7 +236,7 @@ namespace AudioProcessing.GUI
                     isUpdatingValue = true;
 
                     // Calculate the new internal value based on the TrackBar value
-                    float newValue = CalculateInternalValue(trackBar.Value);
+                    double newValue = CalculateInternalValue(trackBar.Value);
 
                     // Make sure the new value is in the correct range
                     newValue = Math.Clamp(newValue, Minimum, Maximum);
@@ -256,7 +248,7 @@ namespace AudioProcessing.GUI
                     UpdateValueLabel();
 
                     // Raise event
-                    OnValueChanged(new ValueChangedEventArgs(newValue));
+                    OnValueChanged(new ValueEventArgs<double>(newValue));
 
                     isUpdatingValue = false;
                 }
@@ -269,6 +261,7 @@ namespace AudioProcessing.GUI
             Maximum = 10f;
             Value = 2.5f;
             Text = "Value: ";
+            valueSuffix = "";
 
             // Add controls to the PrecisionSlider component
             Controls.Add(trackBar);
@@ -280,7 +273,7 @@ namespace AudioProcessing.GUI
             AdjustControls();
             UpdateValueLabel();
 
-            OnValueChanged(new ValueChangedEventArgs(Value));
+            OnValueChanged(new ValueEventArgs<double>(Value));
         }
 
         private void UpdateValueLabel()

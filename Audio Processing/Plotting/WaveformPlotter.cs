@@ -3,21 +3,20 @@ using AudioProcessing.Audio.DSP;
 using AudioProcessing.Events;
 using NAudio.Wave;
 using ScottPlot.WinForms;
+using AudioProcessing.Common;
 
 namespace AudioProcessing.Plotting
 {
     public class WaveformPlotter
     {
         // Plots
-        /*private List<WaveformPlot> waveformPlots = new List<WaveformPlot>();
-        private List<EQWaveformPlot> EQplots = new List<EQWaveformPlot>();*/
-
         private List<IWaveformPlot> plots = new List<IWaveformPlot>();
 
+        // Events
+        public event EventHandler<ValueEventArgs<float>>? ZoomChanged;
 
-        public event EventHandler<ValueChangedEventArgs> ZoomChanged;
-        private int waveformZoom;
-        public int Zoom
+        private float waveformZoom;
+        public float Zoom
         {
             get
             {
@@ -26,26 +25,26 @@ namespace AudioProcessing.Plotting
             set
             {
                 waveformZoom = value;
-                OnZoomChanged(new ValueChangedEventArgs(value));
+                OnZoomChanged(new ValueEventArgs<float>(value));
             }
         }
 
         public WaveformPlotter()
         {
-
+            //frameTimer.Start();
         }
 
-        public void AddWaveformPlot(FormsPlot plot, string title, Mixer.AudioChannel channel)
+        public void AddWaveformPlot(FormsPlot plot, string title, AudioChannel channel)
         {
             AddPlot(new WaveformPlot(plot, title, channel));
         }
 
         public void AddEQWaveformPlot(FormsPlot plot, string title, EqualizerBand[] bands)
         {
-            AddEQWaveformPlot(plot, title, bands, Mixer.AudioChannel.STEREO);
+            AddEQWaveformPlot(plot, title, bands, AudioChannel.Stereo);
         }
 
-        public void AddEQWaveformPlot(FormsPlot plot, string title, EqualizerBand[] bands, Mixer.AudioChannel channel)
+        public void AddEQWaveformPlot(FormsPlot plot, string title, EqualizerBand[] bands, AudioChannel channel)
         {
            AddPlot(new EQWaveformPlot(plot, title, bands, channel));     
         }
@@ -74,7 +73,7 @@ namespace AudioProcessing.Plotting
                 TabPage? currentPage = tabControl.SelectedTab;
                 foreach (WaveformPlot plot in plots)
                 {
-                    if (plot.ParentControl == currentPage)
+                    if (plot.parentControl == currentPage)
                     {
                         plot.RefreshRequested = true;
                     }
@@ -105,12 +104,12 @@ namespace AudioProcessing.Plotting
         {
             foreach(WaveformPlot plot in plots)
             {
-                plot.WavePlot.Clear();
-                plot.FormsPlot.Refresh();
+                plot.wavePlot.Clear();
+                plot.formsPlot.Refresh();
             }
         }
 
-        protected virtual void OnZoomChanged(ValueChangedEventArgs e)
+        protected virtual void OnZoomChanged(ValueEventArgs<float> e)
         {
             ZoomChanged?.Invoke(this, e);
         }

@@ -4,10 +4,8 @@ using System.ComponentModel;
 
 namespace AudioProcessing.GUI
 {
-    public class PrecisionPot : Control
+    public class PrecisionPot : PrecisionControl
     {
-        public event EventHandler<ValueChangedEventArgs> ValueChanged;
-
         private Pot pot;
         private Label descriptionLabel;
         private Label valueLabel;
@@ -105,11 +103,6 @@ namespace AudioProcessing.GUI
             }
         }
 
-        protected virtual void OnValueChanged(ValueChangedEventArgs e)
-        {
-            ValueChanged?.Invoke(this, e);
-        }
-
         public PrecisionPot()
         {
             // Initialize controls
@@ -134,7 +127,7 @@ namespace AudioProcessing.GUI
                     UpdateValueLabel();
 
                     // Raise event
-                    OnValueChanged(new ValueChangedEventArgs((float)Value));
+                    OnValueChanged(new ValueEventArgs<double>(Value));
 
                     isUpdatingValue = false;
                 }
@@ -147,6 +140,7 @@ namespace AudioProcessing.GUI
             Maximum = 1.0f;
             Text = "Value: ";
             PotIndex = -1;
+            valueSuffix = "";
 
             Width = 65;
             Height = 95;
@@ -163,7 +157,7 @@ namespace AudioProcessing.GUI
             AdjustControls();
             UpdateValueLabel();
 
-            OnValueChanged(new ValueChangedEventArgs((float)Value));
+            OnValueChanged(new ValueEventArgs<double>(Value));
         }
 
         private void UpdateValueLabel()

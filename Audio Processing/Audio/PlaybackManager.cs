@@ -1,6 +1,5 @@
-﻿using AudioProcessing.Events;
-using AudioProcessing.Plotting;
-using Microsoft.VisualBasic;
+﻿using AudioProcessing.Common;
+using AudioProcessing.Events;
 using NAudio.Wave;
 
 namespace AudioProcessing.Audio
@@ -12,16 +11,58 @@ namespace AudioProcessing.Audio
         const long OSAMP = 8L;
 
         // Events
-        public event EventHandler<EventArgs> PlaybackStarted;
-        public event EventHandler<EventArgs> PlaybackStopped;
+        public event EventHandler<EventArgs>? PlaybackStarted;
+        public ActionWithInvoke? PlaybackStartedAction { get; set; }
+
+        public event EventHandler<EventArgs>? PlaybackStopped;
+        public ActionWithInvoke? PlaybackStoppedAction { get; set; }
+
+        public event EventHandler<EventArgs>? SpeedChanged;
+        public Action<float>? SpeedChangedAction;
+
+        public event EventHandler<EventArgs>? PitchChanged;
+        public Action<float>? PitchChangedAction;
+
+
+        public event EventHandler<ValueEventArgs<string>>? TimeUpdated;
+        public ActionWithInvoke<string>? TimeUpdatedAction { get; set; }
+
+
+        private void OnPlaybackStarted(EventArgs e)
+        {
+            PlaybackStarted?.Invoke(this, e);
+            PlaybackStartedAction?.Execute();
+        }
+
+        private void OnPlaybackStopped(EventArgs e)
+        {
+            PlaybackStopped?.Invoke(this, e);
+            PlaybackStoppedAction?.Execute();
+        }
+
+        private void OnSpeedChanged(ValueEventArgs<float> e)
+        {
+            SpeedChanged?.Invoke(this, e);
+            SpeedChangedAction?.Invoke(e.Value);
+        }
+
+        private void OnPitchChanged(ValueEventArgs<float> e)
+        {
+            PitchChanged?.Invoke(this, e);
+            PitchChangedAction?.Invoke(e.Value);
+        }
+
+        private void OnTimeUpdated(ValueEventArgs<string> e)
+        {
+            TimeUpdated?.Invoke(this, e);
+            TimeUpdatedAction?.Execute(e.Value);
+        }
 
 
         private WaveOutEvent waveOut = new WaveOutEvent { DesiredLatency = 150, NumberOfBuffers = 3 };
         private BufferedWaveProvider bufferedWaveProvider;
 
-        private Label timeElapsedLabel;
-
-        //public ISampleProvider SourceStream { get; private set; }
+        public TimeFormat PlaybackTimeFormat { get; set; } = TimeFormat.Samples;
         public WaveFormat WaveFormat { get; private set; }
         public SMBPitchShiftingSampleProvider SMB { get; private set; }
 
@@ -45,16 +86,31 @@ namespace AudioProcessing.Audio
                 if (SMB != null)
                 {
                     SMB.PitchFactor = value;
+                    OnPitchChanged(new ValueEventArgs<float>(value));
                 }
             }
         }
-        public float PlaybackSpeed { get; set; }
+
+        private float speed;
+        public float PlaybackSpeed 
+        { 
+            get 
+            {
+                return speed;
+            } 
+            set 
+            {
+                speed = value;
+                OnSpeedChanged(new ValueEventArgs<float>(value));
+            } 
+        }
 
         public float TimeStrech
         {
             get
             {
-                return PlaybackSpeed * PitchFactor == 1 ? PlaybackSpeed : 0;
+                float error = (PlaybackSpeed * PitchFactor) - 1f;
+                return error < 0.01f ? PlaybackSpeed : -1;
             }
             set
             {
@@ -65,20 +121,6 @@ namespace AudioProcessing.Audio
 
         public long CurrentSample { get; private set; }
 
-
-        // Events
-
-        public void OnPlaybackStarted(EventArgs e)
-        {
-            PlaybackStarted?.Invoke(this, e);
-        }
-
-        public void OnPlaybackStopped(EventArgs e)
-        {
-            PlaybackStopped?.Invoke(this, e);
-        }
-
-
         public PlaybackManager(ISampleProvider sourceProvider, WaveFormat waveFormat)
         {
             // Initialize streams
@@ -88,6 +130,7 @@ namespace AudioProcessing.Audio
             // Initialize buffer and wave output
             bufferedWaveProvider = new BufferedWaveProvider(WaveFormat);
             bufferedWaveProvider.BufferDuration = TimeSpan.FromSeconds(5);
+
             waveOut.Init(bufferedWaveProvider);
 
             // Add handler for PlaybackStopped event
@@ -99,34 +142,12 @@ namespace AudioProcessing.Audio
             // Reset values to default
             PlaybackSpeed = 1.0f;
             PitchFactor = 1.0f;
-        }
-
-        public PlaybackManager(WaveFormat waveFormat)
-        {
-            // Initialize buffer and wave output
-            bufferedWaveProvider = new BufferedWaveProvider(waveFormat);
-            bufferedWaveProvider.BufferDuration = TimeSpan.FromSeconds(5);
-            waveOut.Init(bufferedWaveProvider);
-
-            // Add handler for PlaybackStopped event
-            waveOut.PlaybackStopped += (sender, e) =>
-            {
-                OnPlaybackStopped(EventArgs.Empty);
-            };
-
-            // Reset values to default
-            PlaybackSpeed = 1.0f;
-            PitchFactor = 1.0f;
-        }
-
-        public void AddTimeElapsedLabel(Label timeElapsedLabel)
-        {
-            this.timeElapsedLabel = timeElapsedLabel;
         }
 
         public void StartPlayback()
         {
             waveOut.Play();
+            OnPlaybackStarted(EventArgs.Empty);
         }
 
         public void PausePlayback()
@@ -167,10 +188,10 @@ namespace AudioProcessing.Audio
             return bufferedWaveProvider.BufferedBytes > samples * PlaybackSpeed;
         }
 
-        public byte[] AdjustSpeed(byte[] data)
+        public byte[] ApplySpeed(byte[] data)
         {
             CurrentSample += data.Length / 4;
-            UpdateTimeElapsedLabel();
+            OnTimeUpdated(new ValueEventArgs<string>(PlaybackTimeFormat.ToString() + ": " + Utils.FormatTimeElapsed(CurrentSample, PlaybackTimeFormat)));
 
             if (bufferedWaveProvider != null)
             {
@@ -206,19 +227,10 @@ namespace AudioProcessing.Audio
             return data;
         }
 
-        private void UpdateTimeElapsedLabel()
-        {
-            TimeSpan timeElapsed = TimeSpan.FromSeconds(CurrentSample / 44100);
-            timeElapsedLabel.Invoke((MethodInvoker)delegate
-            {
-                timeElapsedLabel.Text = "Samples: " + CurrentSample + "\n" + "Time: " + timeElapsed.ToString();
-            });
-        }
-
         public void Close()
         {
             // Make sure to stop audio output and dispose resources before closing the application
-            waveOut.Stop();
+            StopPlayback();
             waveOut.Dispose();
         }
     }

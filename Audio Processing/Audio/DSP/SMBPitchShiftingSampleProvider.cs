@@ -8,8 +8,8 @@ using NAudio.Wave;
 public class SMBPitchShiftingSampleProvider : ISampleProvider
 {
 
-    private ISampleProvider SourceStream = null;
-    private WaveFormat WFormat = null;
+    private ISampleProvider SourceStream;
+    private WaveFormat WFormat;
     private float Pitch = 1f;
     private int _FFTSize;
     private long _osamp;

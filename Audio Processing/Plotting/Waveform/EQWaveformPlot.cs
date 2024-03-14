@@ -1,4 +1,5 @@
 ﻿using AudioProcessing.Audio.DSP;
+using AudioProcessing.Common;
 using NAudio.Wave;
 using ScottPlot.WinForms;
 
@@ -9,7 +10,7 @@ namespace AudioProcessing.Plotting.Waveform
         private Equalizer EQ;
         private EqualizerBand[] bands;
 
-        public EQWaveformPlot(FormsPlot formsPlot, string title, EqualizerBand[] bands, Mixer.AudioChannel channel) : base(formsPlot, title, channel)
+        public EQWaveformPlot(FormsPlot formsPlot, string title, EqualizerBand[] bands, AudioChannel channel) : base(formsPlot, title, channel)
         {
             this.bands = bands;
         }

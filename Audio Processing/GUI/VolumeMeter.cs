@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿using AudioProcessing.Audio;
+using AudioProcessing.Common;
+using AudioProcessing.Events;
+using System.ComponentModel;
 using System.Drawing.Drawing2D;
 
 namespace AudioProcessing.GUI
@@ -27,6 +30,8 @@ namespace AudioProcessing.GUI
                 Invalidate();
             }
         }
+
+        public AudioChannel Channel { get; set; }
 
         /// <summary>
         /// Minimum volume level in dB
@@ -58,6 +63,24 @@ namespace AudioProcessing.GUI
 
             InitializeComponent();
             OnForeColorChanged(EventArgs.Empty);
+        }
+
+        public void OnVolumeChanged(object? sender, ValueEventArgs<StereoVolume> e)
+        {
+            switch (Channel)
+            {
+                case AudioChannel.Stereo:
+                    VolumeLevel = (e.Value.LeftVolume + e.Value.RightVolume) / 2;
+                    break;
+                case AudioChannel.LeftChannel:
+                    VolumeLevel = e.Value.LeftVolume;
+                    break;
+                case AudioChannel.RightChannel:
+                    VolumeLevel = e.Value.RightVolume;
+                    break;
+                default:
+                    break;
+            }
         }
 
         protected override void OnPaint(PaintEventArgs pe)

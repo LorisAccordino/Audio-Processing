@@ -17,13 +17,6 @@ namespace AudioProcessing.Audio.DSP
             return equalizer.Read(buffer, offset, count);
         }
 
-        public enum AudioChannel
-        {
-            STEREO,
-            LEFT_CHANNEL,
-            RIGHT_CHANNEL,
-        }
-
         public static readonly EqualizerBand[] ISOLATED_LOW =
         {
             // Low
